@@ -2,4 +2,4 @@ module github.com/danielblagy/blog-webapp-server
 
 go 1.14
 
-require github.com/gin-gonic/gin v1.7.7 // indirect
+require github.com/gin-gonic/gin v1.7.7
