@@ -24,6 +24,10 @@ func main() {
 	})
 
 	router.GET("/users", usersController.GetAll)
+	router.GET("/users/:id", usersController.GetById)
+	router.POST("/users/:id", usersController.Create)
+	router.PUT("/users/:id", usersController.Update)
+	router.DELETE("/users/:id", usersController.Delete)
 
 	router.Run(":4000")
 }

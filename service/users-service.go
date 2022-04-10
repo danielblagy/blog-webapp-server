@@ -1,13 +1,17 @@
 package service
 
-import "github.com/danielblagy/blog-webapp-server/entity"
+import (
+	"errors"
+
+	"github.com/danielblagy/blog-webapp-server/entity"
+)
 
 type UsersService interface {
 	GetAll() ([]entity.User, error)
-	GetById(id int) (entity.User, error)
-	Create(id int, user entity.User) (entity.User, error)
-	Update(id int, user entity.User) (entity.User, error)
-	Delete(id int) (entity.User, error)
+	GetById(id string) (entity.User, error)
+	Create(id string, user entity.User) (entity.User, error)
+	Update(id string, user entity.User) (entity.User, error)
+	Delete(id string) (entity.User, error)
 }
 
 type UsersServiceProvider struct {
@@ -24,22 +28,43 @@ func CreateUsersService() UsersService {
 	}
 }
 
-func (service UsersServiceProvider) GetAll() ([]entity.User, error) {
+func (service *UsersServiceProvider) findUser(id string) (entity.User, error) {
+	for _, user := range service.users {
+		if user.Id == id {
+			return user, nil
+		}
+	}
+
+	return entity.User{}, errors.New("user not found")
+}
+
+func (service *UsersServiceProvider) findUserIndex(id string) (int, error) {
+	for i, user := range service.users {
+		if user.Id == id {
+			return i, nil
+		}
+	}
+
+	return -1, errors.New("user not found")
+}
+
+func (service *UsersServiceProvider) GetAll() ([]entity.User, error) {
 	return service.users, nil
 }
 
-func (service UsersServiceProvider) GetById(id int) (entity.User, error) {
+func (service *UsersServiceProvider) GetById(id string) (entity.User, error) {
+	user, err := service.findUser(id)
+	return user, err
+}
+
+func (service *UsersServiceProvider) Create(id string, user entity.User) (entity.User, error) {
 	return entity.User{}, nil
 }
 
-func (service UsersServiceProvider) Create(id int, user entity.User) (entity.User, error) {
+func (service *UsersServiceProvider) Update(id string, user entity.User) (entity.User, error) {
 	return entity.User{}, nil
 }
 
-func (service UsersServiceProvider) Update(id int, user entity.User) (entity.User, error) {
-	return entity.User{}, nil
-}
-
-func (service UsersServiceProvider) Delete(id int) (entity.User, error) {
+func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
 	return entity.User{}, nil
 }

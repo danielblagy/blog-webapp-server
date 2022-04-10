@@ -29,7 +29,7 @@ func (controller *UsersControllerProvider) GetAll(c *gin.Context) {
 	users, err := controller.service.GetAll()
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.JSON(http.StatusNotFound, gin.H{
 			"message": err.Error(),
 		})
 		return
@@ -41,7 +41,16 @@ func (controller *UsersControllerProvider) GetAll(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) GetById(c *gin.Context) {
+	user, err := controller.service.GetById(c.Param("id"))
 
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 func (controller *UsersControllerProvider) Create(c *gin.Context) {
