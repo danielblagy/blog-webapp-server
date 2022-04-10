@@ -63,7 +63,13 @@ func (service *UsersServiceProvider) Create(user entity.User) (entity.User, erro
 }
 
 func (service *UsersServiceProvider) Update(id string, user entity.User) (entity.User, error) {
-	return entity.User{}, nil
+	i, err := service.findUserIndex(id)
+
+	if err == nil {
+		service.users[i] = user
+	}
+
+	return user, err
 }
 
 func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {

@@ -72,7 +72,20 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) Update(c *gin.Context) {
+	user, err := controller.service.GetById(c.Param("id"))
+	if err := c.BindJSON(&user); err != nil {
+		return
+	}
 
+	updatedUser, err := controller.service.Update(c.Param("id"), user)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedUser)
 }
 
 func (controller *UsersControllerProvider) Delete(c *gin.Context) {
