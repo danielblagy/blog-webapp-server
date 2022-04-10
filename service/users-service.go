@@ -73,5 +73,16 @@ func (service *UsersServiceProvider) Update(id string, user entity.User) (entity
 }
 
 func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
-	return entity.User{}, nil
+	i, err := service.findUserIndex(id)
+
+	userToReturn := entity.User{}
+	if err == nil {
+		userToReturn = service.users[i]
+
+		service.users[i] = service.users[len(service.users)-1] // Copy last element to index i.
+		service.users[len(service.users)-1] = entity.User{}    // Erase last element (write zero value).
+		service.users = service.users[:len(service.users)-1]   // Truncate slice.
+	}
+
+	return userToReturn, err
 }

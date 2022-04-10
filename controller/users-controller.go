@@ -89,5 +89,14 @@ func (controller *UsersControllerProvider) Update(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) Delete(c *gin.Context) {
+	user, err := controller.service.Delete(c.Param("id"))
 
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
