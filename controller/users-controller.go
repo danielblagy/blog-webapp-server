@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/danielblagy/blog-webapp-server/entity"
 	"github.com/danielblagy/blog-webapp-server/service"
 	"github.com/gin-gonic/gin"
 )
@@ -54,7 +55,20 @@ func (controller *UsersControllerProvider) GetById(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) Create(c *gin.Context) {
+	var newUser entity.User
+	if err := c.BindJSON(&newUser); err != nil {
+		return
+	}
 
+	createdUser, err := controller.service.Create(newUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, createdUser)
 }
 
 func (controller *UsersControllerProvider) Update(c *gin.Context) {

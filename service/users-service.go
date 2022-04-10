@@ -9,7 +9,7 @@ import (
 type UsersService interface {
 	GetAll() ([]entity.User, error)
 	GetById(id string) (entity.User, error)
-	Create(id string, user entity.User) (entity.User, error)
+	Create(user entity.User) (entity.User, error)
 	Update(id string, user entity.User) (entity.User, error)
 	Delete(id string) (entity.User, error)
 }
@@ -57,8 +57,9 @@ func (service *UsersServiceProvider) GetById(id string) (entity.User, error) {
 	return user, err
 }
 
-func (service *UsersServiceProvider) Create(id string, user entity.User) (entity.User, error) {
-	return entity.User{}, nil
+func (service *UsersServiceProvider) Create(user entity.User) (entity.User, error) {
+	service.users = append(service.users, user)
+	return user, nil
 }
 
 func (service *UsersServiceProvider) Update(id string, user entity.User) (entity.User, error) {
