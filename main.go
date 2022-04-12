@@ -67,6 +67,7 @@ func main() {
 	router.GET("/users", usersController.GetAll)
 	router.GET("/users/:id", usersController.GetById)
 	router.POST("/users/signup", usersController.Create)
+	router.POST("/users/signin", usersController.SignIn)
 	router.PUT("/users/:id", usersController.Update)
 	router.DELETE("/users/:id", usersController.Delete)
 

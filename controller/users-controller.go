@@ -6,6 +6,7 @@ import (
 	"github.com/danielblagy/blog-webapp-server/entity"
 	"github.com/danielblagy/blog-webapp-server/service"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UsersController interface {
@@ -14,6 +15,7 @@ type UsersController interface {
 	Create(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
+	SignIn(c *gin.Context)
 }
 
 type UsersControllerProvider struct {
@@ -107,6 +109,33 @@ func (controller *UsersControllerProvider) Delete(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (controller *UsersControllerProvider) SignIn(c *gin.Context) {
+	var claimedUser entity.User
+	if err := c.BindJSON(&claimedUser); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	user, err := controller.service.GetByLogin(claimedUser.Login)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "user with this login doesn't exist",
+		})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(claimedUser.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": err.Error(),
 		})
 		return
