@@ -57,6 +57,9 @@ func (controller *UsersControllerProvider) GetById(c *gin.Context) {
 func (controller *UsersControllerProvider) Create(c *gin.Context) {
 	var newUser entity.User
 	if err := c.BindJSON(&newUser); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -74,6 +77,9 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 func (controller *UsersControllerProvider) Update(c *gin.Context) {
 	user, err := controller.service.GetById(c.Param("id"))
 	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
 		return
 	}
 
