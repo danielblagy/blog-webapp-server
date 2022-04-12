@@ -2,12 +2,14 @@ package service
 
 import (
 	"github.com/danielblagy/blog-webapp-server/entity"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type UsersService interface {
 	GetAll() ([]entity.User, error)
 	GetById(id string) (entity.User, error)
+	GetByLogin(login string) (entity.User, error)
 	Create(user entity.User) (entity.User, error)
 	Update(id string, user entity.User) (entity.User, error)
 	Delete(id string) (entity.User, error)
@@ -35,7 +37,19 @@ func (service *UsersServiceProvider) GetById(id string) (entity.User, error) {
 	return user, result.Error
 }
 
+func (service *UsersServiceProvider) GetByLogin(login string) (entity.User, error) {
+	var user entity.User
+	result := service.database.Where("login = ?", login).First(&user)
+	return user, result.Error
+}
+
 func (service *UsersServiceProvider) Create(user entity.User) (entity.User, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 0)
+	if err != nil {
+		return user, err
+	}
+	user.Password = string(hash)
+
 	result := service.database.Create(&user)
 	return user, result.Error
 }

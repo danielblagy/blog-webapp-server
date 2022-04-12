@@ -63,6 +63,14 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 		return
 	}
 
+	_, err := controller.service.GetByLogin(newUser.Login)
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{
+			"message": "this login is taken",
+		})
+		return
+	}
+
 	createdUser, err := controller.service.Create(newUser)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
