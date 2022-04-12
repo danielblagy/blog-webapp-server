@@ -63,44 +63,37 @@ func (service *UsersServiceProvider) findUserIndex(idStr string) (int, error) {
 }
 
 func (service *UsersServiceProvider) GetAll() ([]entity.User, error) {
-	//return service.users, nil
-	return []entity.User{}, nil
+	var users []entity.User
+	result := service.database.Find(&users)
+	return users, result.Error
 }
 
 func (service *UsersServiceProvider) GetById(id string) (entity.User, error) {
-	user, err := service.findUser(id)
-	return user, err
+	var user entity.User
+	result := service.database.Find(&user, id)
+	return user, result.Error
 }
 
 func (service *UsersServiceProvider) Create(user entity.User) (entity.User, error) {
-	/*service.users = append(service.users, user)
-	return user, nil*/
-
 	result := service.database.Create(&user)
 	return user, result.Error
 }
 
 func (service *UsersServiceProvider) Update(id string, user entity.User) (entity.User, error) {
-	i, err := service.findUserIndex(id)
+	/*i, err := service.findUserIndex(id)
 
 	if err == nil {
 		service.users[i] = user
 	}
 
-	return user, err
+	return user, err*/
+
+	result := service.database.Save(&user)
+	return user, result.Error
 }
 
 func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
-	i, err := service.findUserIndex(id)
-
-	userToReturn := entity.User{}
-	if err == nil {
-		userToReturn = service.users[i]
-
-		service.users[i] = service.users[len(service.users)-1] // Copy last element to index i.
-		service.users[len(service.users)-1] = entity.User{}    // Erase last element (write zero value).
-		service.users = service.users[:len(service.users)-1]   // Truncate slice.
-	}
-
-	return userToReturn, err
+	user, _ := service.GetById(id)
+	result := service.database.Delete(&entity.User{}, id)
+	return user, result.Error
 }
