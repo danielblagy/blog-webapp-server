@@ -88,6 +88,47 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) Update(c *gin.Context) {
+	// check for authorizatrion
+	tokenString, err := c.Cookie("token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	claims := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("ACCESS_SECRET")), nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": err.Error(),
+			})
+			return
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+	}
+
+	if !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "access denied",
+		})
+		return
+	}
+
+	// if a token is provided and valid, run update logic
+
+	c.JSON(http.StatusOK, gin.H{
+		"hello": claims["user_id"],
+	})
+	return
+
 	user, err := controller.service.GetById(c.Param("id"))
 	if err := c.BindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
