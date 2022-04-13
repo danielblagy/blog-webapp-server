@@ -2,9 +2,12 @@ package controller
 
 import (
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/danielblagy/blog-webapp-server/entity"
 	"github.com/danielblagy/blog-webapp-server/service"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -141,5 +144,33 @@ func (controller *UsersControllerProvider) SignIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	expirationTime := time.Now().Add(time.Minute * 15)
+
+	token, err := controller.generateJWTToken(user, expirationTime)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.SetCookie("token", token, int((time.Minute * 15).Seconds()), "/", "", false, false)
+	/*http.SetCookie(c.Writer, &http.Cookie{
+		Name:    "jws_token",
+		Value:   token,
+		Expires: expirationTime,
+	})*/
+	c.JSON(http.StatusOK, token)
+}
+
+func (controller *UsersControllerProvider) generateJWTToken(user entity.User, expirationTime time.Time) (string, error) {
+	secretKey := os.Getenv("ACCESS_SECRET")
+
+	atClaims := jwt.MapClaims{}
+	atClaims["authorized"] = true
+	atClaims["user_id"] = user.Id
+	atClaims["exp"] = expirationTime.Unix()
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	token, err := at.SignedString([]byte(secretKey))
+	return token, err
 }
