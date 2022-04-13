@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/danielblagy/blog-webapp-server/entity"
@@ -88,56 +89,24 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) Update(c *gin.Context) {
-	// check for authorizatrion
-	tokenString, err := c.Cookie("token")
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	claims := jwt.MapClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
-	})
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
-			})
-			return
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-	}
-
-	if !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "access denied",
-		})
+	claims, ok := controller.checkForAuthorization(c)
+	if !ok {
 		return
 	}
 
 	// if a token is provided and valid, run update logic
 
-	c.JSON(http.StatusOK, gin.H{
-		"hello": claims["user_id"],
-	})
-	return
+	userId := claims.Id
 
-	user, err := controller.service.GetById(c.Param("id"))
-	if err := c.BindJSON(&user); err != nil {
+	var updatedData entity.EditableUserData
+	if err := c.BindJSON(&updatedData); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
 		})
 		return
 	}
 
-	updatedUser, err := controller.service.Update(c.Param("id"), user)
+	updatedUser, err := controller.service.Update(userId, updatedData)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": err.Error(),
@@ -207,11 +176,48 @@ func (controller *UsersControllerProvider) SignIn(c *gin.Context) {
 func (controller *UsersControllerProvider) generateJWTToken(user entity.User, expirationTime time.Time) (string, error) {
 	secretKey := os.Getenv("ACCESS_SECRET")
 
-	atClaims := jwt.MapClaims{}
-	atClaims["authorized"] = true
-	atClaims["user_id"] = user.Id
-	atClaims["exp"] = expirationTime.Unix()
-	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
+	claims := jwt.StandardClaims{}
+	//claims["authorized"] = true
+	claims.Id = strconv.Itoa(user.Id)
+	claims.ExpiresAt = expirationTime.Unix()
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := at.SignedString([]byte(secretKey))
 	return token, err
+}
+
+func (controller *UsersControllerProvider) checkForAuthorization(c *gin.Context) (jwt.StandardClaims, bool) {
+	tokenString, err := c.Cookie("token")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": err.Error(),
+		})
+		return jwt.StandardClaims{}, false
+	}
+
+	claims := jwt.StandardClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("ACCESS_SECRET")), nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": err.Error(),
+			})
+			return jwt.StandardClaims{}, false
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return jwt.StandardClaims{}, false
+		}
+	}
+
+	if !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "access denied",
+		})
+		return jwt.StandardClaims{}, false
+	}
+
+	return claims, true
 }

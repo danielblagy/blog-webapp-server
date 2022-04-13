@@ -17,3 +17,8 @@ func (u User) MarshalJSON() ([]byte, error) {
 	x.Password = "" // we set omitempty in User type, and here we make password empty, so the password propery will be ommited
 	return json.Marshal(x)
 }
+
+type EditableUserData struct {
+	FullName string `json:"fullname"`
+	Password string `json:"password"`
+}

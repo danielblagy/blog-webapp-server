@@ -11,7 +11,7 @@ type UsersService interface {
 	GetById(id string) (entity.User, error)
 	GetByLogin(login string) (entity.User, error)
 	Create(user entity.User) (entity.User, error)
-	Update(id string, user entity.User) (entity.User, error)
+	Update(id string, updatedData entity.EditableUserData) (entity.User, error)
 	Delete(id string) (entity.User, error)
 }
 
@@ -54,7 +54,22 @@ func (service *UsersServiceProvider) Create(user entity.User) (entity.User, erro
 	return user, result.Error
 }
 
-func (service *UsersServiceProvider) Update(id string, user entity.User) (entity.User, error) {
+func (service *UsersServiceProvider) Update(id string, updatedData entity.EditableUserData) (entity.User, error) {
+	var user entity.User
+	service.database.Find(&user, id)
+
+	if updatedData.FullName != "" {
+		user.FullName = updatedData.FullName
+	}
+
+	if updatedData.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(updatedData.Password), 0)
+		if err != nil {
+			return user, err
+		}
+		user.Password = string(hash)
+	}
+
 	result := service.database.Save(&user)
 	return user, result.Error
 }
