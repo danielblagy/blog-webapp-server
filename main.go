@@ -69,6 +69,7 @@ func main() {
 
 	router.POST("/users/signup", usersController.Create)
 	router.POST("/users/signin", usersController.SignIn)
+	router.POST("/users/refresh", usersController.Refresh)
 
 	router.PUT("/users", usersController.Update)
 	router.DELETE("/users/:id", usersController.Delete)

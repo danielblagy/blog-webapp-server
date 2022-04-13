@@ -20,6 +20,7 @@ type UsersController interface {
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
 	SignIn(c *gin.Context)
+	Refresh(c *gin.Context)
 }
 
 type UsersControllerProvider struct {
@@ -89,7 +90,7 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) Update(c *gin.Context) {
-	claims, ok := controller.checkForAuthorization(c)
+	claims, ok := controller.checkForAuthorization(c, "accessToken", "ACCESS_SECRET")
 	if !ok {
 		return
 	}
@@ -154,39 +155,36 @@ func (controller *UsersControllerProvider) SignIn(c *gin.Context) {
 		return
 	}
 
-	expirationTime := time.Now().Add(time.Minute * 15)
+	controller.createTokenPair(c, strconv.Itoa(user.Id))
+}
 
-	token, err := controller.generateJWTToken(user, expirationTime)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
+func (controller *UsersControllerProvider) Refresh(c *gin.Context) {
+	claims, ok := controller.checkForAuthorization(c, "refreshToken", "REFRESH_SECRET")
+	if !ok {
 		return
 	}
 
-	c.SetCookie("token", token, int((time.Minute * 15).Seconds()), "/", "", false, false)
-	/*http.SetCookie(c.Writer, &http.Cookie{
-		Name:    "jws_token",
-		Value:   token,
-		Expires: expirationTime,
-	})*/
-	c.JSON(http.StatusOK, token)
+	// if a token is provided and valid, run update logic
+
+	userId := claims.Id
+
+	controller.createTokenPair(c, userId)
 }
 
-func (controller *UsersControllerProvider) generateJWTToken(user entity.User, expirationTime time.Time) (string, error) {
-	secretKey := os.Getenv("ACCESS_SECRET")
+func (controller *UsersControllerProvider) generateJWTToken(userId string, secretKeyEnvVariable string, expirationTime time.Time) (string, error) {
+	secretKey := os.Getenv(secretKeyEnvVariable)
 
 	claims := jwt.StandardClaims{}
 	//claims["authorized"] = true
-	claims.Id = strconv.Itoa(user.Id)
+	claims.Id = userId
 	claims.ExpiresAt = expirationTime.Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	token, err := at.SignedString([]byte(secretKey))
 	return token, err
 }
 
-func (controller *UsersControllerProvider) checkForAuthorization(c *gin.Context) (jwt.StandardClaims, bool) {
-	tokenString, err := c.Cookie("token")
+func (controller *UsersControllerProvider) checkForAuthorization(c *gin.Context, cookieName string, secretKeyEnvVariable string) (jwt.StandardClaims, bool) {
+	tokenString, err := c.Cookie(cookieName)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": err.Error(),
@@ -196,7 +194,7 @@ func (controller *UsersControllerProvider) checkForAuthorization(c *gin.Context)
 
 	claims := jwt.StandardClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("ACCESS_SECRET")), nil
+		return []byte(os.Getenv(secretKeyEnvVariable)), nil
 	})
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
@@ -220,4 +218,36 @@ func (controller *UsersControllerProvider) checkForAuthorization(c *gin.Context)
 	}
 
 	return claims, true
+}
+
+func (controller *UsersControllerProvider) createTokenPair(c *gin.Context, userId string) {
+	accessTokenDuration := time.Minute * 15
+	refreshTokenDuration := time.Hour * 24 * 21
+
+	accessTokenExpirationTime := time.Now().Add(accessTokenDuration)
+	refreshTokenExpirationTime := time.Now().Add(refreshTokenDuration)
+
+	accessToken, err := controller.generateJWTToken(userId, "ACCESS_SECRET", accessTokenExpirationTime)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	refreshToken, err := controller.generateJWTToken(userId, "REFRESH_SECRET", refreshTokenExpirationTime)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.SetCookie("accessToken", accessToken, int(accessTokenDuration.Seconds()), "/", "", false, false)
+	c.SetCookie("refreshToken", refreshToken, int(refreshTokenDuration.Seconds()), "/", "", false, false)
+
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
 }
