@@ -75,7 +75,7 @@ func (service *UsersServiceProvider) Update(id string, updatedData entity.Editab
 }
 
 func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
-	user, _ := service.GetById(id)
+	user, _ := service.GetById(id) // getting the user before deleting to return
 	result := service.database.Delete(&entity.User{}, id)
 	return user, result.Error
 }

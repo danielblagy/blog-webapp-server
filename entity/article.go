@@ -7,3 +7,9 @@ type Article struct {
 	Content   string `json:"content" gorm:"type:text;not null"`
 	Published bool   `json:"published" gorm:"not null"`
 }
+
+type EditableArticleData struct {
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	Published bool   `json:"published"`
+}
