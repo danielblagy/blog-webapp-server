@@ -34,6 +34,10 @@ func (service *UsersServiceProvider) GetAll() ([]entity.User, error) {
 func (service *UsersServiceProvider) GetById(id string) (entity.User, error) {
 	var user entity.User
 	result := service.database.Find(&user, id)
+
+	// TODO: user GORM for that
+	service.database.Where("author_id = ?", user.Id).Find(&user.Articles)
+
 	return user, result.Error
 }
 
