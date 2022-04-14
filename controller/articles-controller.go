@@ -97,9 +97,88 @@ func (controller *ArticlesControllerProvider) Create(c *gin.Context) {
 }
 
 func (controller *ArticlesControllerProvider) Update(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
 
+	// if a token is provided and valid, run update logic
+
+	userId := claims.Id
+	articleId := c.Param("id")
+
+	article, err := controller.service.GetById(articleId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// ensure the user owns the article
+	userIdInt, _ := strconv.Atoi(userId)
+	if userIdInt != article.AuthorId {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	var updatedData entity.EditableArticleData
+	if err := c.BindJSON(&updatedData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	updatedArticle, err := controller.service.Update(articleId, updatedData)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedArticle)
 }
 
 func (controller *ArticlesControllerProvider) Delete(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
 
+	// if a token is provided and valid, run update logic
+
+	userId := claims.Id
+	articleId := c.Param("id")
+
+	article, err := controller.service.GetById(articleId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// ensure the user owns the article
+	userIdInt, _ := strconv.Atoi(userId)
+	if userIdInt != article.AuthorId {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "access denied",
+		})
+		return
+	}
+
+	deletedArticle, err := controller.service.Delete(articleId)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, deletedArticle)
 }

@@ -116,6 +116,7 @@ func (controller *UsersControllerProvider) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedUser)
 }
 
+// TODO: check if client is an authorized administrator
 func (controller *UsersControllerProvider) Delete(c *gin.Context) {
 	user, err := controller.service.Delete(c.Param("id"))
 

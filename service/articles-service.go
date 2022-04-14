@@ -69,6 +69,6 @@ func (service *ArticlesServiceProvider) Update(id string, updatedData entity.Edi
 
 func (service *ArticlesServiceProvider) Delete(id string) (entity.Article, error) {
 	article, _ := service.GetById(id) // getting the article before deleting to return
-	result := service.database.Delete(&entity.User{}, id)
+	result := service.database.Delete(&entity.Article{}, id)
 	return article, result.Error
 }
