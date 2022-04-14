@@ -119,7 +119,7 @@ func (controller *ArticlesControllerProvider) Update(c *gin.Context) {
 	userIdInt, _ := strconv.Atoi(userId)
 	if userIdInt != article.AuthorId {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": err.Error(),
+			"message": "access denied",
 		})
 		return
 	}

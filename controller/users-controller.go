@@ -118,7 +118,16 @@ func (controller *UsersControllerProvider) Update(c *gin.Context) {
 
 // TODO: check if client is an authorized administrator
 func (controller *UsersControllerProvider) Delete(c *gin.Context) {
-	user, err := controller.service.Delete(c.Param("id"))
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run update logic
+
+	userId := claims.Id
+
+	user, err := controller.service.Delete(userId)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
