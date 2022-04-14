@@ -2,13 +2,11 @@ package controller
 
 import (
 	"net/http"
-	"os"
 	"strconv"
-	"time"
 
+	"github.com/danielblagy/blog-webapp-server/auth"
 	"github.com/danielblagy/blog-webapp-server/entity"
 	"github.com/danielblagy/blog-webapp-server/service"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -90,7 +88,7 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) Update(c *gin.Context) {
-	claims, ok := controller.checkForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
 	if !ok {
 		return
 	}
@@ -155,11 +153,11 @@ func (controller *UsersControllerProvider) SignIn(c *gin.Context) {
 		return
 	}
 
-	controller.createTokenPair(c, strconv.Itoa(user.Id))
+	auth.CreateTokenPair(c, strconv.Itoa(user.Id))
 }
 
 func (controller *UsersControllerProvider) Refresh(c *gin.Context) {
-	claims, ok := controller.checkForAuthorization(c, "refreshToken", "REFRESH_SECRET")
+	claims, ok := auth.CheckForAuthorization(c, "refreshToken", "REFRESH_SECRET")
 	if !ok {
 		return
 	}
@@ -168,86 +166,5 @@ func (controller *UsersControllerProvider) Refresh(c *gin.Context) {
 
 	userId := claims.Id
 
-	controller.createTokenPair(c, userId)
-}
-
-func (controller *UsersControllerProvider) generateJWTToken(userId string, secretKeyEnvVariable string, expirationTime time.Time) (string, error) {
-	secretKey := os.Getenv(secretKeyEnvVariable)
-
-	claims := jwt.StandardClaims{}
-	//claims["authorized"] = true
-	claims.Id = userId
-	claims.ExpiresAt = expirationTime.Unix()
-	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	token, err := at.SignedString([]byte(secretKey))
-	return token, err
-}
-
-func (controller *UsersControllerProvider) checkForAuthorization(c *gin.Context, cookieName string, secretKeyEnvVariable string) (jwt.StandardClaims, bool) {
-	tokenString, err := c.Cookie(cookieName)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": err.Error(),
-		})
-		return jwt.StandardClaims{}, false
-	}
-
-	claims := jwt.StandardClaims{}
-	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv(secretKeyEnvVariable)), nil
-	})
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"message": err.Error(),
-			})
-			return jwt.StandardClaims{}, false
-		} else {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
-			})
-			return jwt.StandardClaims{}, false
-		}
-	}
-
-	if !token.Valid {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "access denied",
-		})
-		return jwt.StandardClaims{}, false
-	}
-
-	return claims, true
-}
-
-func (controller *UsersControllerProvider) createTokenPair(c *gin.Context, userId string) {
-	accessTokenDuration := time.Minute * 15
-	refreshTokenDuration := time.Hour * 24 * 21
-
-	accessTokenExpirationTime := time.Now().Add(accessTokenDuration)
-	refreshTokenExpirationTime := time.Now().Add(refreshTokenDuration)
-
-	accessToken, err := controller.generateJWTToken(userId, "ACCESS_SECRET", accessTokenExpirationTime)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	refreshToken, err := controller.generateJWTToken(userId, "REFRESH_SECRET", refreshTokenExpirationTime)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	c.SetCookie("accessToken", accessToken, int(accessTokenDuration.Seconds()), "/", "", false, false)
-	c.SetCookie("refreshToken", refreshToken, int(refreshTokenDuration.Seconds()), "/", "", false, false)
-
-	c.JSON(http.StatusOK, gin.H{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-	})
+	auth.CreateTokenPair(c, userId)
 }
