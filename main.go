@@ -16,6 +16,9 @@ var (
 	usersService    service.UsersService
 	usersController controller.UsersController
 
+	articlesService    service.ArticlesService
+	articlesController controller.ArticlesController
+
 	database          *gorm.DB
 	dbConnectionError error
 )
@@ -29,8 +32,13 @@ func main() {
 
 	// init services and controllers
 
+	// TODO: init services and controllers somewhere else ??
+
 	usersService = service.CreateUsersService(database)
 	usersController = controller.CreateUsersController(usersService)
+
+	articlesService = service.CreateArticlesService(database)
+	articlesController = controller.CreateArticlesController(articlesService)
 
 	// set up gin router
 
@@ -44,6 +52,7 @@ func main() {
 
 	api := router.Group("/")
 	routes.CreateUsersRoutes(api, usersController)
+	routes.CreateArticlesRoutes(api, articlesController)
 
 	router.Run(":4000")
 }
