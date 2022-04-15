@@ -12,4 +12,4 @@ require (
 	gorm.io/gorm v1.23.4
 )
 
-// +heroku goVersion <version>
+// +heroku goVersion go1.14
