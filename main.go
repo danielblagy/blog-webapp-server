@@ -56,5 +56,9 @@ func main() {
 	routes.CreateArticlesRoutes(api, articlesController)
 
 	serverPort := os.Getenv("PORT")
-	router.Run(":" + serverPort)
+	if serverPort == "" {
+		log.Fatal("$PORT must be set")
+	}
+
+	log.Fatal(router.Run(":" + serverPort))
 }
