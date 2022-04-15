@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/danielblagy/blog-webapp-server/controller"
 	"github.com/danielblagy/blog-webapp-server/db"
@@ -54,5 +55,6 @@ func main() {
 	routes.CreateUsersRoutes(api, usersController)
 	routes.CreateArticlesRoutes(api, articlesController)
 
-	router.Run(":4000")
+	serverPort := os.Getenv("PORT")
+	router.Run(":" + serverPort)
 }
