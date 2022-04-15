@@ -1,1 +1,1 @@
-web: bin\blog-webapp-server.exe
+web: bin/blog-webapp-server
