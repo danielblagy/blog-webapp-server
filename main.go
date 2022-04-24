@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/danielblagy/blog-webapp-server/controller"
 	"github.com/danielblagy/blog-webapp-server/db"
@@ -55,10 +54,5 @@ func main() {
 	routes.CreateUsersRoutes(api, usersController)
 	routes.CreateArticlesRoutes(api, articlesController)
 
-	serverPort := os.Getenv("PORT")
-	if serverPort == "" {
-		log.Fatal("$PORT must be set")
-	}
-
-	log.Fatal(router.Run(":" + serverPort))
+	log.Fatal(router.Run())
 }
