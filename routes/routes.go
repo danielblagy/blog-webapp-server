@@ -14,6 +14,7 @@ func CreateUsersRoutes(apiGroup *gin.RouterGroup, usersController controller.Use
 	users.POST("/signup", usersController.Create)
 	users.POST("/signin", usersController.SignIn)
 	users.POST("/refresh", usersController.Refresh)
+	users.GET("/me", usersController.Me)
 
 	users.PUT("/", usersController.Update)
 	// TODO: create delete /:id endpoint for administrators

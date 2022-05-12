@@ -54,5 +54,5 @@ func main() {
 	routes.CreateUsersRoutes(api, usersController)
 	routes.CreateArticlesRoutes(api, articlesController)
 
-	log.Fatal(router.Run())
+	log.Fatal(router.Run(":4000"))
 }
