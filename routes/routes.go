@@ -19,3 +19,15 @@ func CreateUsersRoutes(apiGroup *gin.RouterGroup, usersController controller.Use
 	// TODO: create delete /:id endpoint for administrators
 	users.DELETE("/", usersController.Delete)
 }
+
+func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controller.ArticlesController) {
+	users := apiGroup.Group("/articles")
+
+	users.GET("/", articlesController.GetAll)
+	users.GET("/:id", articlesController.GetById)
+
+	users.POST("/", articlesController.Create)
+
+	users.PUT("/:id", articlesController.Update)
+	users.DELETE("/:id", articlesController.Delete)
+}

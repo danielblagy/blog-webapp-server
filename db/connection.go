@@ -16,13 +16,13 @@ func SetUpConnection() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	/*host := os.Getenv("HOST")
-	dbPort := os.Getenv("DBPORT")
-	user := os.Getenv("USER")
-	dbName := os.Getenv("NAME")
-	password := os.Getenv("PASSWORD")
-
-	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s port=%s", host, user, dbName, password, dbPort)*/
+	isHeroku := os.Getenv("IS_HEROKU")
+	if isHeroku != "yes" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
+	}
 
 	dbURI := os.Getenv("DATABASE_URL")
 

@@ -19,6 +19,7 @@ type UsersController interface {
 	Delete(c *gin.Context)
 	SignIn(c *gin.Context)
 	Refresh(c *gin.Context)
+	Me(c *gin.Context)
 }
 
 type UsersControllerProvider struct {
@@ -123,7 +124,7 @@ func (controller *UsersControllerProvider) Delete(c *gin.Context) {
 		return
 	}
 
-	// if a token is provided and valid, run update logic
+	// if a token is provided and valid, run delete logic
 
 	userId := claims.Id
 
@@ -177,4 +178,26 @@ func (controller *UsersControllerProvider) Refresh(c *gin.Context) {
 	userId := claims.Id
 
 	auth.CreateTokenPair(c, userId)
+}
+
+func (controller *UsersControllerProvider) Me(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run 'me' logic
+
+	userId := claims.Id
+
+	user, err := controller.service.GetById(userId)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
