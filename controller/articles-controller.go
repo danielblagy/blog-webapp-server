@@ -29,6 +29,8 @@ func CreateArticlesController(service service.ArticlesService) ArticlesControlle
 }
 
 func (controller *ArticlesControllerProvider) GetAll(c *gin.Context) {
+	// TODO : only return published articles
+
 	articles, err := controller.service.GetAll()
 
 	if err != nil {
@@ -42,9 +44,24 @@ func (controller *ArticlesControllerProvider) GetAll(c *gin.Context) {
 }
 
 func (controller *ArticlesControllerProvider) GetById(c *gin.Context) {
-	article, err := controller.service.GetById(c.Param("id"))
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	userId := "-1"
+	if ok {
+		userId = claims.Id
+	}
+
+	// if user is unauthorized, userId will be '-1' (used in the service to hide private articles)
+
+	article, err := controller.service.GetById(c.Param("id"), userId)
 
 	if err != nil {
+		if err.Error() == "article is private" {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": err.Error(),
 		})
@@ -107,7 +124,7 @@ func (controller *ArticlesControllerProvider) Update(c *gin.Context) {
 	userId := claims.Id
 	articleId := c.Param("id")
 
-	article, err := controller.service.GetById(articleId)
+	article, err := controller.service.GetById(articleId, userId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": err.Error(),
@@ -154,7 +171,7 @@ func (controller *ArticlesControllerProvider) Delete(c *gin.Context) {
 	userId := claims.Id
 	articleId := c.Param("id")
 
-	article, err := controller.service.GetById(articleId)
+	article, err := controller.service.GetById(articleId, userId)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": err.Error(),

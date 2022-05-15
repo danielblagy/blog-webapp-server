@@ -1,13 +1,16 @@
 package service
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/danielblagy/blog-webapp-server/entity"
 	"gorm.io/gorm"
 )
 
 type ArticlesService interface {
 	GetAll() ([]entity.Article, error)
-	GetById(id string) (entity.Article, error)
+	GetById(id string, userId string) (entity.Article, error)
 	GetByTitle(authorId string, title string) (entity.Article, error)
 	Create(article entity.Article) (entity.Article, error)
 	Update(id string, updatedData entity.EditableArticleData) (entity.Article, error)
@@ -26,13 +29,24 @@ func CreateArticlesService(database *gorm.DB) ArticlesService {
 
 func (service *ArticlesServiceProvider) GetAll() ([]entity.Article, error) {
 	var articles []entity.Article
-	result := service.database.Find(&articles)
+	result := service.database.Where("published = true").Find(&articles)
 	return articles, result.Error
 }
 
-func (service *ArticlesServiceProvider) GetById(id string) (entity.Article, error) {
+func (service *ArticlesServiceProvider) GetById(id string, userId string) (entity.Article, error) {
 	var article entity.Article
+
+	if userId == "-1" {
+		result := service.database.Where("published = true").First(&article, id)
+		return article, result.Error
+	}
+
 	result := service.database.First(&article, id)
+
+	if article.Published == false && strconv.Itoa(article.AuthorId) != userId {
+		return entity.Article{}, errors.New("article is private")
+	}
+
 	return article, result.Error
 }
 
@@ -68,7 +82,11 @@ func (service *ArticlesServiceProvider) Update(id string, updatedData entity.Edi
 }
 
 func (service *ArticlesServiceProvider) Delete(id string) (entity.Article, error) {
-	article, _ := service.GetById(id) // getting the article before deleting to return
+	//article, _ := service.GetById(id)
+	// getting the article before deleting to return
+	var article entity.Article
+	service.database.First(&article, id)
+
 	result := service.database.Delete(&entity.Article{}, id)
 	return article, result.Error
 }
