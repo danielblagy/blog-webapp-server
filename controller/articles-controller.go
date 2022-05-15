@@ -29,8 +29,6 @@ func CreateArticlesController(service service.ArticlesService) ArticlesControlle
 }
 
 func (controller *ArticlesControllerProvider) GetAll(c *gin.Context) {
-	// TODO : only return published articles
-
 	articles, err := controller.service.GetAll()
 
 	if err != nil {

@@ -44,8 +44,8 @@ func CreateTokenPair(c *gin.Context, userId string) {
 		return
 	}
 
-	c.SetCookie("accessToken", accessToken, int(accessTokenDuration.Seconds()), "/", "", false, false)
-	c.SetCookie("refreshToken", refreshToken, int(refreshTokenDuration.Seconds()), "/", "", false, false)
+	c.SetCookie("accessToken", accessToken, int(accessTokenDuration.Seconds()), "/", "", false, true)
+	c.SetCookie("refreshToken", refreshToken, int(refreshTokenDuration.Seconds()), "/", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"access_token":  accessToken,
