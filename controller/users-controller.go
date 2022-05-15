@@ -48,7 +48,7 @@ func (controller *UsersControllerProvider) GetAll(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) GetById(c *gin.Context) {
-	user, err := controller.service.GetById(c.Param("id"))
+	user, err := controller.service.GetById(c.Param("id"), false)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
@@ -190,7 +190,7 @@ func (controller *UsersControllerProvider) Me(c *gin.Context) {
 
 	userId := claims.Id
 
-	user, err := controller.service.GetById(userId)
+	user, err := controller.service.GetById(userId, true)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{

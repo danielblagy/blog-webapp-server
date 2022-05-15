@@ -8,7 +8,7 @@ import (
 
 type UsersService interface {
 	GetAll() ([]entity.User, error)
-	GetById(id string) (entity.User, error)
+	GetById(id string, authorized bool) (entity.User, error)
 	GetByLogin(login string) (entity.User, error)
 	Create(user entity.User) (entity.User, error)
 	Update(id string, updatedData entity.EditableUserData) (entity.User, error)
@@ -31,13 +31,16 @@ func (service *UsersServiceProvider) GetAll() ([]entity.User, error) {
 	return users, result.Error
 }
 
-func (service *UsersServiceProvider) GetById(id string) (entity.User, error) {
+func (service *UsersServiceProvider) GetById(id string, authorized bool) (entity.User, error) {
 	var user entity.User
 	// TODO: use First and see if it generates result.Error if not found
 	result := service.database.Find(&user, id)
 
-	// TODO: use GORM for that
-	service.database.Where("author_id = ?", user.Id).Find(&user.Articles)
+	if authorized {
+		service.database.Where("author_id = ?", user.Id).Find(&user.Articles)
+	} else {
+		service.database.Where("author_id = ? and published = true", user.Id).Find(&user.Articles)
+	}
 
 	return user, result.Error
 }
@@ -80,7 +83,7 @@ func (service *UsersServiceProvider) Update(id string, updatedData entity.Editab
 }
 
 func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
-	user, _ := service.GetById(id) // getting the user before deleting to return
+	user, _ := service.GetById(id, true) // getting the user before deleting to return
 	result := service.database.Delete(&entity.User{}, id)
 	return user, result.Error
 }
