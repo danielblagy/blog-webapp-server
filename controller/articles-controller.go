@@ -100,6 +100,8 @@ func (controller *ArticlesControllerProvider) Create(c *gin.Context) {
 		return
 	}
 
+	// TODO : test title validation
+
 	createdArticle, err := controller.service.Create(newArticle)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

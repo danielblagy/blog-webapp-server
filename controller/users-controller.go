@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -65,6 +66,15 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 	if err := c.BindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
+		})
+		return
+	}
+
+	// TODO: test user data validation
+
+	if newUser.Login == "" || newUser.Password == "" || newUser.FullName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": errors.New("invalid user data"),
 		})
 		return
 	}
