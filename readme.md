@@ -4,6 +4,15 @@
 * [Data Structures](#data-structures)
 	* [User](#user)
 	* [Article](#article)
+* [/users endpoint](#/users)
+	* [Get all users](#Get-all-users-:-GET-users/)
+	* [Get user by id](#Get-user-by-id-:-GET-users/:id)
+	* [Sign up user](#Sign-up-user-:-POST-users/signup)
+	* [Sign in user](#Sign-in-user-:-POST-users/signin)
+	* [Refresh User Tokens](#Refresh-User-Tokens-:-POST-users/refresh)
+	* [Get my data](#Get-my-data-:-GET-users/me)
+	* [Update my data](#Update-my-data-:-PUT-users/)
+	* [Delete my data](#Delete-my-data-:-DELETE-users/)
 
 ## Data structures
 
@@ -143,7 +152,7 @@ Response on success (`200 OK`)
 }
 ```
 
-### Sign Up user : POST users/signup
+### Sign up user : POST users/signup
 
 #### Request
 
@@ -191,7 +200,7 @@ Response on success (`201 Created`)
 }
 ```
 
-### Sign In user : POST users/signin
+### Sign in user : POST users/signin
 
 #### Request
 
@@ -236,6 +245,8 @@ Response on success (`200 OK`)
 
 ### Refresh User Tokens : POST users/refresh
 
+User must be signed in.
+
 #### Response
 
 | Case | Status | Body |
@@ -257,7 +268,9 @@ Response on success (`200 OK`)
 }
 ```
 
-### Get logged in user's data : GET users/me
+### Get my data : GET users/me
+
+User must be signed in.
 
 #### Response
 
@@ -283,7 +296,9 @@ Response on success (`200 OK`)
 }
 ```
 
-### Update user : PUT users/
+### Update my data : PUT users/
+
+User must be signed in.
 
 #### Request
 
@@ -331,7 +346,9 @@ Response on success (`200 OK`)
 }
 ```
 
-### Delete user : DELETE users/
+### Delete my data : DELETE users/
+
+User must be signed in.
 
 #### Response
 
