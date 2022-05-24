@@ -191,4 +191,96 @@ Response on success (`201 Created`)
 }
 ```
 
+### Sign In user : POST users/signin
+
+#### Request
+
+Request body structure (example)
+
+```json
+{
+    "login": "danielblagy",
+    "password": "danielblagypassword"
+}
+```
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | `{ "access_token": [], "refresh_token": [] }` |
+| Request body is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| No user with login | `404 Not Found` | `{ "message": "user with this login doesn't exist" }` |
+| Incorrect password | `401 Unauthorized` | `{ "message": [error message] }` |
+| Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request POST users/signin
+
+Request body
+```json
+{
+    "login": "johnpeterson",
+    "password": "johnp"
+}
+```
+
+Response on success (`200 OK`)
+```json
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTMzODQ5ODEsImp0aSI6IjE0In0.UPMVXrXya9McDhECCE1OrnPayya6UQFvqtU67MdIJBE",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTUxOTg0ODEsImp0aSI6IjE0In0.le7yayzG8U-JHm0Vd2O8uR1doWaCKbCV899_8qQZih8"
+}
+```
+
+### Refresh User Tokens : POST users/refresh
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | `{ "access_token": [], "refresh_token": [] }` |
+| Refresh Token cookie doesn't exist | `400 Bad Request` | `{ "message": [error message] }` |
+| Not logged it / Refresh Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
+| Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request POST users/refresh
+
+Response on success (`200 OK`)
+```json
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTMzODUyMjksImp0aSI6IjE0In0._RHg0S8TyWzNcXM5FjWzR6gHOA14Bq9YQexnw4uYfck",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTUxOTg3MjksImp0aSI6IjE0In0.p4AaMdA7EA6jsCRqWTkhBzY-_ZqKfFSE8reBLj72ylY"
+}
+```
+
+### Get logged in user's data : GET users/me
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | User object |
+| Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Couldn't get user by id | `404 Not Found` | `{ "message": [error message] }` |
+| Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
+| Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request GET users/me
+
+Response on success (`200 OK`)
+```json
+{
+    "id": 14,
+    "login": "johnpeterson",
+    "fullname": "John Peterson",
+    "articles": []
+}
+```
+
 ### Update user : PUT users/
