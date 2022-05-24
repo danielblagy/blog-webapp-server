@@ -4,15 +4,15 @@
 * [Data Structures](#data-structures)
 	* [User](#user)
 	* [Article](#article)
-* [/users endpoint](#/users)
-	* [Get all users](#Get-all-users-:-GET-users/)
-	* [Get user by id](#Get-user-by-id-:-GET-users/:id)
-	* [Sign up user](#Sign-up-user-:-POST-users/signup)
-	* [Sign in user](#Sign-in-user-:-POST-users/signin)
-	* [Refresh User Tokens](#Refresh-User-Tokens-:-POST-users/refresh)
-	* [Get my data](#Get-my-data-:-GET-users/me)
-	* [Update my data](#Update-my-data-:-PUT-users/)
-	* [Delete my data](#Delete-my-data-:-DELETE-users/)
+* [/users endpoint](#users)
+	* [Get all users](#get-all-users)
+	* [Get user by id](#get-user-by-id)
+	* [Sign up user](#sign-up-user)
+	* [Sign in user](#sign-in-user)
+	* [Refresh User Tokens](#refresh-user-tokens)
+	* [Get my data](#get-my-data)
+	* [Update my data](#update-my-data)
+	* [Delete my data](#delete-my-data)
 
 ## Data structures
 
@@ -68,7 +68,8 @@ JSON Example of Article object
 
 ## users/
 
-### Get all users : GET users/
+### *Get all users*
+### GET users/
 
 #### Response
 
@@ -117,7 +118,8 @@ Response on successful retrieval (`200 OK`)
 }
 ```
 
-### Get user by id : GET users/:id
+### *Get user by id*
+### GET users/:id
 
 #### Request
 
@@ -152,7 +154,8 @@ Response on success (`200 OK`)
 }
 ```
 
-### Sign up user : POST users/signup
+### *Sign up user*
+### POST users/signup
 
 #### Request
 
@@ -200,7 +203,8 @@ Response on success (`201 Created`)
 }
 ```
 
-### Sign in user : POST users/signin
+### *Sign in user*
+### POST users/signin
 
 #### Request
 
@@ -243,7 +247,8 @@ Response on success (`200 OK`)
 }
 ```
 
-### Refresh User Tokens : POST users/refresh
+### *Refresh User Tokens*
+### POST users/refresh
 
 User must be signed in.
 
@@ -268,7 +273,8 @@ Response on success (`200 OK`)
 }
 ```
 
-### Get my data : GET users/me
+### *Get my data*
+### GET users/me
 
 User must be signed in.
 
@@ -296,7 +302,8 @@ Response on success (`200 OK`)
 }
 ```
 
-### Update my data : PUT users/
+### *Update my data*
+### PUT users/
 
 User must be signed in.
 
@@ -346,7 +353,8 @@ Response on success (`200 OK`)
 }
 ```
 
-### Delete my data : DELETE users/
+### *Delete my data*
+### DELETE users/
 
 User must be signed in.
 
