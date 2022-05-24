@@ -61,13 +61,16 @@ JSON Example of Article object
 
 ### Get all users : GET users/
 
+#### Response
+
 | Case | Status | Body |
 | --- | --- | --- |
 | On success | `200 OK` | An array named 'users' of User objects |
-| On failure | `404 Not Found` | Empty |
+| On failure | `404 Not Found` | `{ "message": [error message] }` |
 
-Example (on successul retrieval)
+#### Example
 
+Response on successful retrieval (`200 OK`)
 ```json
 {
     "users": [
@@ -109,7 +112,7 @@ Example (on successul retrieval)
 
 #### Request
 
-`id` must correspond to 
+`id` must correspond to user id
 
 #### Response
 
@@ -118,8 +121,11 @@ Example (on successul retrieval)
 | On success | `200 OK` | User object |
 | On failure | `404 Not Found` | `{ "message": "record not found" }` |
 
-Example (on success, GET users/8)
+#### Example
 
+Request GET users/8
+
+Response on success (`200 OK`)
 ```json
 {
     "id": 8,
@@ -162,8 +168,20 @@ login, fullname, and password must not be empty strings.
 | Login is taken | `409 Conflict` | `{ "message": "this login is taken" }` |
 | On failure | `500 Internal Server Error` | `{ "message": [server error] }` |
 
-Example (on success, POST users/signup)
+#### Example
 
+Request POST users/signup
+
+Request body
+```json
+{
+    "login": "johnpeterson",
+    "fullname": "John Peterson",
+    "password": "johnp"
+}
+```
+
+Response on success (`201 Created`)
 ```json
 {
     "id": 14,
