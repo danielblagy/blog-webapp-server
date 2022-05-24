@@ -284,3 +284,49 @@ Response on success (`200 OK`)
 ```
 
 ### Update user : PUT users/
+
+#### Request
+
+Request body structure (example)
+
+```json
+{
+    "fullname": "Daniel Updated Blagy",
+    "password": "myupdatedpassword"
+}
+```
+
+Only `fullname` and `password` fields of User object can be updated.
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | User object |
+| Request body is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
+| Couldn't get user with id | `404 Not Found` | `{ "message": [error message] }` |
+| Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request PUT users/
+
+Request body
+```json
+{
+    "fullname": "John Derek Peterson",
+    "password": "johnp2"
+}
+```
+
+Response on success (`200 OK`)
+```json
+{
+    "id": 14,
+    "login": "johnpeterson",
+    "fullname": "John Derek Peterson",
+    "articles": null
+}
+```
