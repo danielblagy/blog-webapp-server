@@ -265,7 +265,7 @@ Response on success (`200 OK`)
 | --- | --- | --- |
 | Success | `200 OK` | User object |
 | Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
-| Couldn't get user by id | `404 Not Found` | `{ "message": [error message] }` |
+| Couldn't get user by id / User doesn't exist | `404 Not Found` | `{ "message": [error message] }` |
 | Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
 | Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
 
@@ -306,7 +306,7 @@ Only `fullname` and `password` fields of User object can be updated.
 | Request body is invalid | `400 Bad Request` | `{ "message": [error message] }` |
 | Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
 | Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
-| Couldn't get user with id | `404 Not Found` | `{ "message": [error message] }` |
+| Couldn't get user with id / User doesn't exist | `404 Not Found` | `{ "message": [error message] }` |
 | Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
 
 #### Example
@@ -328,5 +328,32 @@ Response on success (`200 OK`)
     "login": "johnpeterson",
     "fullname": "John Derek Peterson",
     "articles": null
+}
+```
+
+### Delete user : DELETE users/
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | User object |
+| Request body is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
+| Couldn't get user with id / User doesn't exist | `404 Not Found` | `{ "message": [error message] }` |
+| Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request DELETE users/
+
+Response on success (`200 OK`)
+```json
+{
+    "id": 14,
+    "login": "johnpeterson",
+    "fullname": "John Derek Peterson",
+    "articles": []
 }
 ```
