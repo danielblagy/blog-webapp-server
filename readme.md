@@ -59,7 +59,7 @@ JSON Example of Article object
 
 ## users/
 
-### GET users/
+### Get all users : GET users/
 
 | Case | Status | Body |
 | --- | --- | --- |
@@ -105,7 +105,13 @@ Example (on successul retrieval)
 }
 ```
 
-### GET users/:id
+### Get user by id : GET users/:id
+
+#### Request
+
+`id` must correspond to 
+
+#### Response
 
 | Case | Status | Body |
 | --- | --- | --- |
@@ -130,3 +136,41 @@ Example (on success, GET users/8)
     ]
 }
 ```
+
+### Sign Up user : POST users/signup
+
+#### Request
+
+Request body structure (example)
+
+```json
+{
+    "login": "danielblagy",
+    "fullname": "Daniel Blagy",
+    "password": "danielblagypassword"
+}
+```
+
+login, fullname, and password must not be empty strings.
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| On success | `201 Created` | User object of newly created user. |
+| Not all required fields provided | `400 Bad Request` | `{ "message": "invalid user data" }` |
+| Login is taken | `409 Conflict` | `{ "message": "this login is taken" }` |
+| On failure | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+Example (on success, POST users/signup)
+
+```json
+{
+    "id": 14,
+    "login": "johnpeterson",
+    "fullname": "John Peterson",
+    "articles": null
+}
+```
+
+### Update user : PUT users/

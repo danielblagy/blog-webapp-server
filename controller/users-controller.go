@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -74,7 +73,7 @@ func (controller *UsersControllerProvider) Create(c *gin.Context) {
 
 	if newUser.Login == "" || newUser.Password == "" || newUser.FullName == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": errors.New("invalid user data"),
+			"message": "invalid user data",
 		})
 		return
 	}

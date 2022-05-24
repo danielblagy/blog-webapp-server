@@ -33,7 +33,6 @@ func (service *UsersServiceProvider) GetAll() ([]entity.User, error) {
 
 func (service *UsersServiceProvider) GetById(id string, authorized bool) (entity.User, error) {
 	var user entity.User
-	// TODO: use First and see if it generates result.Error if not found
 	result := service.database.First(&user, id)
 
 	if authorized {
