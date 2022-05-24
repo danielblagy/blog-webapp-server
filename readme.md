@@ -1,0 +1,132 @@
+# REST API Documentation
+
+## Contents
+* [Data Structures](#data-structures)
+	* [User](#user)
+	* [Article](#article)
+
+## Data structures
+
+### User
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | int | Primary key. |
+| login | string | Each user has a unique login, max length is 100 characters. |
+| fullname | string | First and last name of the user, max length is 300 characters. |
+| articles | []Article | An array of articles written by the user. |
+
+JSON Example of User object
+
+```json
+{
+    "id": 8,
+    "login": "jazz_oogie",
+    "fullname": "Jamie Dunkin",
+    "articles": [
+        {
+            "id": 5,
+            "author_id": 8,
+            "title": "my article",
+            "content": "hello :)",
+            "published": true
+        }
+    ]
+}
+```
+
+### Article
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | int | Primary key. |
+| author_id | int | ID of the user who owns the article. |
+| title | string | Title must be unique relative to other articles of the user, max length is 300 characters. |
+| content | string | The content of the article. |
+| published | boolean | If true, it's public and can be read by other users, it's private otherwise. |
+
+JSON Example of Article object
+
+```json
+{
+    "id": 1,
+    "author_id": 10,
+    "title": "New Title",
+    "content": "Updated content.",
+    "published": true
+}
+```
+
+## users/
+
+### GET users/
+
+| Case | Status | Body |
+| --- | --- | --- |
+| On success | `200 OK` | An array named 'users' of User objects |
+| On failure | `404 Not Found` | Empty |
+
+Example (on successul retrieval)
+
+```json
+{
+    "users": [
+        {
+            "id": 8,
+            "login": "jazz_oogie",
+            "fullname": "Jamie Dunkin",
+            "articles": null
+        },
+        {
+            "id": 10,
+            "login": "danielblagy",
+            "fullname": "Daniel Blagy",
+            "articles": null
+        },
+        {
+            "id": 11,
+            "login": "tomalberto",
+            "fullname": "Thomas Alberto",
+            "articles": null
+        },
+        {
+            "id": 12,
+            "login": "sergey",
+            "fullname": "Sergey Urtugov",
+            "articles": null
+        },
+        {
+            "id": 13,
+            "login": "tomsanders",
+            "fullname": "Tom Sanders",
+            "articles": null
+        }
+    ]
+}
+```
+
+### GET users/:id
+
+| Case | Status | Body |
+| --- | --- | --- |
+| On success | `200 OK` | User object |
+| On failure | `404 Not Found` | `{ "message": "record not found" }` |
+
+Example (on success, GET users/8)
+
+```json
+{
+    "id": 8,
+    "login": "jazz_oogie",
+    "fullname": "Jamie Dunkin",
+    "articles": [
+        {
+            "id": 5,
+            "author_id": 8,
+            "title": "my article",
+            "content": "hello :)",
+            "published": true
+        }
+    ]
+}
+```
