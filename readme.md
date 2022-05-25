@@ -382,3 +382,181 @@ Response on success (`200 OK`)
     "articles": []
 }
 ```
+
+## /articles endpoint
+
+### *Get articles*
+### GET articles/
+
+Get all published articles.
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | An array of Article objects. |
+| Failure | `404 Not Found` | `{ "message": [error message] }` |
+
+#### Example
+
+Request GET articles/
+
+Response on success (`200 OK`)
+```json
+[
+    {
+        "id": 5,
+        "author_id": 8,
+        "title": "my article",
+        "content": "hello :)",
+        "published": true
+    },
+    {
+        "id": 1,
+        "author_id": 10,
+        "title": "New Title",
+        "content": "Updated content.",
+        "published": true
+    }
+]
+```
+
+### *Get article by id*
+### GET article/:id
+
+If the user is authorized, they can access their private articles.
+
+#### Request
+
+`id` must correspond to article id.
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | Article object |
+| Failure / Accessing private article while unauthorized | `404 Not Found` | `{ "message": "record not found" }` |
+| No access to a private article when authorized | `401 Unauthorized` | `{ "message": "article is private" }` |
+
+#### Example
+
+Request GET articles/5
+
+Response on success (`200 OK`)
+```json
+{
+    "id": 5,
+    "author_id": 8,
+    "title": "my article",
+    "content": "hello :)",
+    "published": true
+}
+```
+
+### *Create article*
+### POST articles/
+
+User must be signed in.
+
+#### Request
+
+Request body structure (example)
+
+```json
+{
+    "title": "Green Leopards",
+    "content": "Have u seen them?",
+    "published": false
+}
+```
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `201 Created` | Article object of newly created article. |
+| Request body is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
+| User already has article with that title | `409 Conflict` | `{ "message": "user already has article with this title" }` |
+| Server Error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request POST articles/
+
+Request body
+```json
+{
+    "title": "Green Leopards",
+    "content": "Have u seen them?",
+    "published": false
+}
+```
+
+Response on success (`201 Created`)
+```json
+{
+    "id": 8,
+    "author_id": 12,
+    "title": "Green Leopards",
+    "content": "Have u seen them?",
+    "published": false
+}
+```
+
+### *Update article*
+### PUT articles/:id
+
+User must be signed in.
+
+`id` must correspond to article id.
+
+#### Request
+
+Request body structure (example)
+
+```json
+{
+    "title": "Title updated",
+    "content": "Content updated",
+    "published": true
+}
+```
+
+Only `title`, `content`, and `published` fields of Article object can be updated.
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | Article object |
+| Request body is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
+| User doesn't own the article | `401 Unauthorized` | `{ "message": "access denied" }` |
+| Couldn't get article with id / Article doesn't exist / Failure | `404 Not Found` | `{ "message": [error message] }` |
+| Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request PUT articles/8
+
+Request body
+```json
+{
+    "content": "Have u seen them? I bet you haven't.",
+    "published": true
+}
+```
+
+Response on success (`200 OK`)
+```json
+{
+    "id": 8,
+    "author_id": 12,
+    "title": "Green Leopards",
+    "content": "Have u seen them? I bet you haven't.",
+    "published": true
+}
+```

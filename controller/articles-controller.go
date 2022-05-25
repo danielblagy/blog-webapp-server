@@ -42,7 +42,7 @@ func (controller *ArticlesControllerProvider) GetAll(c *gin.Context) {
 }
 
 func (controller *ArticlesControllerProvider) GetById(c *gin.Context) {
-	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	claims, ok := auth.SilentlyCheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
 	userId := "-1"
 	if ok {
 		userId = claims.Id

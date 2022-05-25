@@ -89,3 +89,29 @@ func CheckForAuthorization(c *gin.Context, cookieName string, secretKeyEnvVariab
 
 	return claims, true
 }
+
+// Won't send out a response on failure
+func SilentlyCheckForAuthorization(c *gin.Context, cookieName string, secretKeyEnvVariable string) (jwt.StandardClaims, bool) {
+	tokenString, err := c.Cookie(cookieName)
+	if err != nil {
+		return jwt.StandardClaims{}, false
+	}
+
+	claims := jwt.StandardClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv(secretKeyEnvVariable)), nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			return jwt.StandardClaims{}, false
+		} else {
+			return jwt.StandardClaims{}, false
+		}
+	}
+
+	if !token.Valid {
+		return jwt.StandardClaims{}, false
+	}
+
+	return claims, true
+}
