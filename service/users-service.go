@@ -35,10 +35,16 @@ func (service *UsersServiceProvider) GetById(id string, authorized bool) (entity
 	var user entity.User
 	result := service.database.First(&user, id)
 
-	if authorized {
-		service.database.Where("author_id = ?", user.Id).Find(&user.Articles)
-	} else {
-		service.database.Where("author_id = ? and published = true", user.Id).Find(&user.Articles)
+	condition := "author_id = ?"
+	if !authorized {
+		condition += " and published = true"
+	}
+
+	// TODO: deal with this mess
+	service.database.Where(condition, user.Id).Find(&user.Articles)
+	// set article.author field for every article
+	for i := range user.Articles {
+		service.database.Where("id = ?", user.Id).Find(&user.Articles[i].Author)
 	}
 
 	return user, result.Error
