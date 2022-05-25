@@ -532,6 +532,11 @@ Request body structure (example)
 
 Only `title`, `content`, and `published` fields of Article object can be updated.
 
+`title` field is optional (don't supply if you don't want it updated).
+
+If `content` field is not provided, content will be updated to an empty string.
+If you don't want `content` changed, provide the old value.
+
 #### Response
 
 | Case | Status | Body |
