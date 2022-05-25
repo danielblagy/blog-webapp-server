@@ -75,8 +75,8 @@ JSON Example of Article object
 
 | Case | Status | Body |
 | --- | --- | --- |
-| On success | `200 OK` | An array named 'users' of User objects |
-| On failure | `404 Not Found` | `{ "message": [error message] }` |
+| Success | `200 OK` | An array named 'users' of User objects |
+| Failure | `404 Not Found` | `{ "message": [error message] }` |
 
 #### Example
 
@@ -123,14 +123,14 @@ Response on successful retrieval (`200 OK`)
 
 #### Request
 
-`id` must correspond to user id
+`id` must correspond to user id.
 
 #### Response
 
 | Case | Status | Body |
 | --- | --- | --- |
-| On success | `200 OK` | User object |
-| On failure | `404 Not Found` | `{ "message": "record not found" }` |
+| Success | `200 OK` | User object |
+| Failure | `404 Not Found` | `{ "message": "record not found" }` |
 
 #### Example
 
@@ -175,10 +175,10 @@ login, fullname, and password must not be empty strings.
 
 | Case | Status | Body |
 | --- | --- | --- |
-| On success | `201 Created` | User object of newly created user. |
+| Success | `201 Created` | User object of newly created user. |
 | Not all required fields provided | `400 Bad Request` | `{ "message": "invalid user data" }` |
 | Login is taken | `409 Conflict` | `{ "message": "this login is taken" }` |
-| On failure | `500 Internal Server Error` | `{ "message": [server error] }` |
+| Server Error | `500 Internal Server Error` | `{ "message": [server error] }` |
 
 #### Example
 
@@ -549,6 +549,40 @@ Request body
     "published": true
 }
 ```
+
+Response on success (`200 OK`)
+```json
+{
+    "id": 8,
+    "author_id": 12,
+    "title": "Green Leopards",
+    "content": "Have u seen them? I bet you haven't.",
+    "published": true
+}
+```
+
+### *Delete article*
+### DELETE articles/:id
+
+User must be signed in.
+
+`id` must correspond to article id.
+
+#### Response
+
+| Case | Status | Body |
+| --- | --- | --- |
+| Success | `200 OK` | User object |
+| Request body is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Access Token is invalid | `400 Bad Request` | `{ "message": [error message] }` |
+| Not logged it / Access Token has expired | `401 Unauthorized` | `{ "message": [error message] }` |
+| User doesn't own the article | `401 Unauthorized` | `{ "message": "access denied" }` |
+| Couldn't get article with id / Article doesn't exist / Failure | `404 Not Found` | `{ "message": [error message] }` |
+| Server error | `500 Internal Server Error` | `{ "message": [server error] }` |
+
+#### Example
+
+Request DELETE articles/8
 
 Response on success (`200 OK`)
 ```json
