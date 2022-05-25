@@ -30,6 +30,11 @@ func CreateArticlesService(database *gorm.DB) ArticlesService {
 func (service *ArticlesServiceProvider) GetAll() ([]entity.Article, error) {
 	var articles []entity.Article
 	result := service.database.Where("published = true").Find(&articles)
+
+	for i, article := range articles {
+		service.database.Where("id = ?", article.AuthorId).Find(&articles[i].Author)
+	}
+
 	return articles, result.Error
 }
 
@@ -38,6 +43,7 @@ func (service *ArticlesServiceProvider) GetById(id string, userId string) (entit
 
 	if userId == "-1" {
 		result := service.database.Where("published = true").First(&article, id)
+		service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
 		return article, result.Error
 	}
 
@@ -47,6 +53,7 @@ func (service *ArticlesServiceProvider) GetById(id string, userId string) (entit
 		return entity.Article{}, errors.New("article is private")
 	}
 
+	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
 	return article, result.Error
 }
 
@@ -58,6 +65,7 @@ func (service *ArticlesServiceProvider) GetByTitle(authorId string, title string
 
 func (service *ArticlesServiceProvider) Create(article entity.Article) (entity.Article, error) {
 	result := service.database.Create(&article)
+	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
 	return article, result.Error
 }
 
@@ -78,6 +86,7 @@ func (service *ArticlesServiceProvider) Update(id string, updatedData entity.Edi
 	}
 
 	result := service.database.Save(&article)
+	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
 	return article, result.Error
 }
 
@@ -86,6 +95,7 @@ func (service *ArticlesServiceProvider) Delete(id string) (entity.Article, error
 	// getting the article before deleting to return
 	var article entity.Article
 	service.database.First(&article, id)
+	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
 
 	result := service.database.Delete(&entity.Article{}, id)
 	return article, result.Error
