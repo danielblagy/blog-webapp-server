@@ -389,9 +389,9 @@ Response on success (`200 OK`)
 }
 ```
 
-## /articles endpoint
+## /articles
 
-### *Get articles*
+### *Get all articles*
 ### GET articles/
 
 Get all published articles.
