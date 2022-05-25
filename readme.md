@@ -13,6 +13,12 @@
 	* [Get my data](#get-my-data)
 	* [Update my data](#update-my-data)
 	* [Delete my data](#delete-my-data)
+* [/articles endpoint](#articles)
+	* [Get all articles](#get-all-articles)
+	* [Get article by id](#get-article-by-id)
+	* [Create article](#create-article)
+	* [Update article](#update-article)
+	* [Delete article](#delete-article)
 
 ## Data structures
 
