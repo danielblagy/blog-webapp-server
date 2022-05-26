@@ -27,18 +27,33 @@ func CreateArticlesService(database *gorm.DB) ArticlesService {
 	}
 }
 
+func (service *ArticlesServiceProvider) loadAssociatedData(article *entity.Article) error {
+	// loading article.author
+	result := service.database.Where("id = ?", article.AuthorId).First(&article.Author)
+	if result.Error != nil {
+		return errors.New("failed to load associated data")
+	}
+
+	// loading article.saves
+	var count int64
+	result = service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
+	if result.Error != nil {
+		return errors.New("failed to load associated data")
+	}
+	article.Saves = int(count)
+
+	return nil
+}
+
 func (service *ArticlesServiceProvider) GetAll() ([]entity.Article, error) {
 	var articles []entity.Article
 	result := service.database.Where("published = true").Find(&articles)
 
 	// associated data
-	for i, article := range articles {
-		// author
-		service.database.Where("id = ?", article.AuthorId).Find(&articles[i].Author)
-		// saves
-		var count int64
-		service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
-		articles[i].Saves = int(count)
+	for i := range articles {
+		if err := service.loadAssociatedData(&articles[i]); err != nil {
+			return articles, err
+		}
 	}
 
 	return articles, result.Error
@@ -59,13 +74,9 @@ func (service *ArticlesServiceProvider) GetById(id string, userId string) (entit
 		return entity.Article{}, errors.New("article is private")
 	}
 
-	// associated data
-	// author
-	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
-	// saves
-	var count int64
-	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
-	article.Saves = int(count)
+	if err := service.loadAssociatedData(&article); err != nil {
+		return article, err
+	}
 
 	return article, result.Error
 }
@@ -79,13 +90,9 @@ func (service *ArticlesServiceProvider) GetByTitle(authorId string, title string
 func (service *ArticlesServiceProvider) Create(article entity.Article) (entity.Article, error) {
 	result := service.database.Create(&article)
 
-	// associated data
-	//author
-	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
-	// saves
-	var count int64
-	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
-	article.Saves = int(count)
+	if err := service.loadAssociatedData(&article); err != nil {
+		return article, err
+	}
 
 	return article, result.Error
 }
@@ -108,13 +115,9 @@ func (service *ArticlesServiceProvider) Update(id string, updatedData entity.Edi
 
 	result := service.database.Save(&article)
 
-	// associated data
-	// author
-	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
-	// saves
-	var count int64
-	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
-	article.Saves = int(count)
+	if err := service.loadAssociatedData(&article); err != nil {
+		return article, err
+	}
 
 	return article, result.Error
 }
@@ -125,13 +128,9 @@ func (service *ArticlesServiceProvider) Delete(id string) (entity.Article, error
 	var article entity.Article
 	service.database.First(&article, id)
 
-	// associated data
-	// author
-	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
-	// saves
-	var count int64
-	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
-	article.Saves = int(count)
+	if err := service.loadAssociatedData(&article); err != nil {
+		return article, err
+	}
 
 	result := service.database.Delete(&entity.Article{}, id)
 	return article, result.Error
