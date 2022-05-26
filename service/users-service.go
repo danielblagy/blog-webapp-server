@@ -28,6 +28,19 @@ func CreateUsersService(database *gorm.DB) UsersService {
 func (service *UsersServiceProvider) GetAll() ([]entity.User, error) {
 	var users []entity.User
 	result := service.database.Find(&users)
+
+	// TODO: deal with getting associated data
+	// associated data
+	var count int64
+	for i := range users {
+		// set followers count field
+		service.database.Model(&entity.Follower{}).Where("follows_id = ?", users[i].Id).Count(&count)
+		users[i].Followers = int(count)
+		// set following count field
+		service.database.Model(&entity.Follower{}).Where("follower_id = ?", users[i].Id).Count(&count)
+		users[i].Following = int(count)
+	}
+
 	return users, result.Error
 }
 
@@ -40,12 +53,20 @@ func (service *UsersServiceProvider) GetById(id string, authorized bool) (entity
 		condition += " and published = true"
 	}
 
+	// associated data
 	// TODO: deal with this mess
 	service.database.Where(condition, user.Id).Find(&user.Articles)
 	// set article.author field for every article
 	for i := range user.Articles {
 		service.database.Where("id = ?", user.Id).Find(&user.Articles[i].Author)
 	}
+	// set followers count field
+	var count int64
+	service.database.Model(&entity.Follower{}).Where("follows_id = ?", user.Id).Count(&count)
+	user.Followers = int(count)
+	// set following count field
+	service.database.Model(&entity.Follower{}).Where("follower_id = ?", user.Id).Count(&count)
+	user.Following = int(count)
 
 	return user, result.Error
 }

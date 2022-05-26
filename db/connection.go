@@ -35,6 +35,7 @@ func SetUpConnection() (*gorm.DB, error) {
 	// make migrations to the db (will be done only once, if the entities have never been created before)
 	database.AutoMigrate(&entity.User{})
 	database.AutoMigrate(&entity.Article{})
+	database.AutoMigrate(&entity.Follower{})
 
 	return database, dbConnectionError
 }
