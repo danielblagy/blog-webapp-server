@@ -11,6 +11,7 @@ type Article struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Author    User      `json:"author" gorm:"-"`
+	Saves     int       `json:"saves" gorm:"-"`
 }
 
 type EditableArticleData struct {

@@ -54,14 +54,18 @@ func (service *UsersServiceProvider) GetById(id string, authorized bool) (entity
 	}
 
 	// associated data
+	var count int64
 	// TODO: deal with this mess
 	service.database.Where(condition, user.Id).Find(&user.Articles)
-	// set article.author field for every article
+	// set articles associated data
 	for i := range user.Articles {
+		// set article.author field for every article
 		service.database.Where("id = ?", user.Id).Find(&user.Articles[i].Author)
+		// set article.saves
+		service.database.Model(entity.Save{}).Where("article_id = ?", user.Articles[i].Id).Count(&count)
+		user.Articles[i].Saves = int(count)
 	}
 	// set followers count field
-	var count int64
 	service.database.Model(&entity.Follower{}).Where("follows_id = ?", user.Id).Count(&count)
 	user.Followers = int(count)
 	// set following count field

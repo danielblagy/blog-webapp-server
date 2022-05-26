@@ -31,8 +31,14 @@ func (service *ArticlesServiceProvider) GetAll() ([]entity.Article, error) {
 	var articles []entity.Article
 	result := service.database.Where("published = true").Find(&articles)
 
+	// associated data
 	for i, article := range articles {
+		// author
 		service.database.Where("id = ?", article.AuthorId).Find(&articles[i].Author)
+		// saves
+		var count int64
+		service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
+		articles[i].Saves = int(count)
 	}
 
 	return articles, result.Error
@@ -53,7 +59,14 @@ func (service *ArticlesServiceProvider) GetById(id string, userId string) (entit
 		return entity.Article{}, errors.New("article is private")
 	}
 
+	// associated data
+	// author
 	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
+	// saves
+	var count int64
+	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
+	article.Saves = int(count)
+
 	return article, result.Error
 }
 
@@ -65,7 +78,15 @@ func (service *ArticlesServiceProvider) GetByTitle(authorId string, title string
 
 func (service *ArticlesServiceProvider) Create(article entity.Article) (entity.Article, error) {
 	result := service.database.Create(&article)
+
+	// associated data
+	//author
 	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
+	// saves
+	var count int64
+	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
+	article.Saves = int(count)
+
 	return article, result.Error
 }
 
@@ -86,7 +107,15 @@ func (service *ArticlesServiceProvider) Update(id string, updatedData entity.Edi
 	}
 
 	result := service.database.Save(&article)
+
+	// associated data
+	// author
 	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
+	// saves
+	var count int64
+	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
+	article.Saves = int(count)
+
 	return article, result.Error
 }
 
@@ -95,7 +124,14 @@ func (service *ArticlesServiceProvider) Delete(id string) (entity.Article, error
 	// getting the article before deleting to return
 	var article entity.Article
 	service.database.First(&article, id)
+
+	// associated data
+	// author
 	service.database.Where("id = ?", article.AuthorId).Find(&article.Author)
+	// saves
+	var count int64
+	service.database.Model(entity.Save{}).Where("article_id = ?", article.Id).Count(&count)
+	article.Saves = int(count)
 
 	result := service.database.Delete(&entity.Article{}, id)
 	return article, result.Error
