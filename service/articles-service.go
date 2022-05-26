@@ -9,6 +9,7 @@ import (
 )
 
 type ArticlesService interface {
+	LoadAssociatedData(*entity.Article) error
 	GetAll() ([]entity.Article, error)
 	GetById(id string, userId string) (entity.Article, error)
 	GetByTitle(authorId string, title string) (entity.Article, error)
@@ -27,7 +28,8 @@ func CreateArticlesService(database *gorm.DB) ArticlesService {
 	}
 }
 
-func (service *ArticlesServiceProvider) loadAssociatedData(article *entity.Article) error {
+func (service *ArticlesServiceProvider) LoadAssociatedData(article *entity.Article) error {
+	// NOTE: user's associeated data will not be loaded
 	// loading article.author
 	result := service.database.Where("id = ?", article.AuthorId).First(&article.Author)
 	if result.Error != nil {
@@ -51,7 +53,7 @@ func (service *ArticlesServiceProvider) GetAll() ([]entity.Article, error) {
 
 	// associated data
 	for i := range articles {
-		if err := service.loadAssociatedData(&articles[i]); err != nil {
+		if err := service.LoadAssociatedData(&articles[i]); err != nil {
 			return articles, err
 		}
 	}
@@ -74,7 +76,7 @@ func (service *ArticlesServiceProvider) GetById(id string, userId string) (entit
 		return entity.Article{}, errors.New("article is private")
 	}
 
-	if err := service.loadAssociatedData(&article); err != nil {
+	if err := service.LoadAssociatedData(&article); err != nil {
 		return article, err
 	}
 
@@ -90,7 +92,7 @@ func (service *ArticlesServiceProvider) GetByTitle(authorId string, title string
 func (service *ArticlesServiceProvider) Create(article entity.Article) (entity.Article, error) {
 	result := service.database.Create(&article)
 
-	if err := service.loadAssociatedData(&article); err != nil {
+	if err := service.LoadAssociatedData(&article); err != nil {
 		return article, err
 	}
 
@@ -115,7 +117,7 @@ func (service *ArticlesServiceProvider) Update(id string, updatedData entity.Edi
 
 	result := service.database.Save(&article)
 
-	if err := service.loadAssociatedData(&article); err != nil {
+	if err := service.LoadAssociatedData(&article); err != nil {
 		return article, err
 	}
 
@@ -128,7 +130,7 @@ func (service *ArticlesServiceProvider) Delete(id string) (entity.Article, error
 	var article entity.Article
 	service.database.First(&article, id)
 
-	if err := service.loadAssociatedData(&article); err != nil {
+	if err := service.LoadAssociatedData(&article); err != nil {
 		return article, err
 	}
 

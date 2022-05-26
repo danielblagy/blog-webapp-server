@@ -34,11 +34,11 @@ func main() {
 
 	// TODO: init services and controllers somewhere else ??
 
-	usersService = service.CreateUsersService(database)
-	usersController = controller.CreateUsersController(usersService)
-
 	articlesService = service.CreateArticlesService(database)
 	articlesController = controller.CreateArticlesController(articlesService)
+
+	usersService = service.CreateUsersService(database, articlesService)
+	usersController = controller.CreateUsersController(usersService)
 
 	// set up gin router
 

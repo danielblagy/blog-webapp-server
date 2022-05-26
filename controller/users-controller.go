@@ -48,7 +48,9 @@ func (controller *UsersControllerProvider) GetAll(c *gin.Context) {
 }
 
 func (controller *UsersControllerProvider) GetById(c *gin.Context) {
-	user, err := controller.service.GetById(c.Param("id"), false)
+	_, ok := auth.SilentlyCheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+
+	user, err := controller.service.GetById(c.Param("id"), ok)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/danielblagy/blog-webapp-server/entity"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -16,29 +18,61 @@ type UsersService interface {
 }
 
 type UsersServiceProvider struct {
-	database *gorm.DB
+	database        *gorm.DB
+	articlesService ArticlesService
 }
 
-func CreateUsersService(database *gorm.DB) UsersService {
+func CreateUsersService(database *gorm.DB, articlesService ArticlesService) UsersService {
 	return &UsersServiceProvider{
-		database: database,
+		database:        database,
+		articlesService: articlesService,
 	}
+}
+
+func (service *UsersServiceProvider) loadAssociatedData(user *entity.User, accessLevelCondition string) error {
+	if result := service.database.Where(accessLevelCondition, user.Id).Find(&user.Articles); result.Error != nil {
+		return errors.New("failed to load associated data")
+	}
+
+	// load articles associated data
+	for i := range user.Articles {
+		if err := service.articlesService.LoadAssociatedData(&user.Articles[i]); err != nil {
+			return err
+		}
+	}
+
+	service.loadAssociatedFollowersData(user)
+
+	return nil
+}
+
+// Won't load user.articles and articles associated data
+func (service *UsersServiceProvider) loadAssociatedFollowersData(user *entity.User) error {
+	var count int64
+	// loading user.followers
+	if result := service.database.Model(&entity.Follower{}).Where("follows_id = ?", user.Id).Count(&count); result.Error != nil {
+		return errors.New("failed to load associated data")
+	}
+	user.Followers = int(count)
+	// loading user.following
+	if result := service.database.Model(&entity.Follower{}).Where("follower_id = ?", user.Id).Count(&count); result.Error != nil {
+		return errors.New("failed to load associated data")
+	}
+	user.Following = int(count)
+
+	return nil
 }
 
 func (service *UsersServiceProvider) GetAll() ([]entity.User, error) {
 	var users []entity.User
 	result := service.database.Find(&users)
 
-	// TODO: deal with getting associated data
-	// associated data
-	var count int64
+	// load users associated data
 	for i := range users {
-		// set followers count field
-		service.database.Model(&entity.Follower{}).Where("follows_id = ?", users[i].Id).Count(&count)
-		users[i].Followers = int(count)
-		// set following count field
-		service.database.Model(&entity.Follower{}).Where("follower_id = ?", users[i].Id).Count(&count)
-		users[i].Following = int(count)
+		// TODO : handle "failed to load associated data" error in controller
+		if err := service.loadAssociatedFollowersData(&users[i]); err != nil {
+			return users, result.Error
+		}
 	}
 
 	return users, result.Error
@@ -53,24 +87,10 @@ func (service *UsersServiceProvider) GetById(id string, authorized bool) (entity
 		condition += " and published = true"
 	}
 
-	// associated data
-	var count int64
-	// TODO: deal with this mess
-	service.database.Where(condition, user.Id).Find(&user.Articles)
-	// set articles associated data
-	for i := range user.Articles {
-		// set article.author field for every article
-		service.database.Where("id = ?", user.Id).Find(&user.Articles[i].Author)
-		// set article.saves
-		service.database.Model(entity.Save{}).Where("article_id = ?", user.Articles[i].Id).Count(&count)
-		user.Articles[i].Saves = int(count)
+	// TODO : handle "failed to load associated data" error in controller
+	if err := service.loadAssociatedData(&user, condition); err != nil {
+		return user, result.Error
 	}
-	// set followers count field
-	service.database.Model(&entity.Follower{}).Where("follows_id = ?", user.Id).Count(&count)
-	user.Followers = int(count)
-	// set following count field
-	service.database.Model(&entity.Follower{}).Where("follower_id = ?", user.Id).Count(&count)
-	user.Following = int(count)
 
 	return user, result.Error
 }
