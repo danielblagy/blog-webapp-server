@@ -16,6 +16,8 @@ type ArticlesController interface {
 	Create(c *gin.Context)
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
+	Save(c *gin.Context)
+	Unsave(c *gin.Context)
 }
 
 type ArticlesControllerProvider struct {
@@ -198,4 +200,64 @@ func (controller *ArticlesControllerProvider) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, deletedArticle)
+}
+
+func (controller *ArticlesControllerProvider) Save(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run 'me' logic
+
+	userId := claims.Id
+
+	// check if the article to save exists
+	articleToSave := c.Param("id")
+	article, err := controller.service.GetById(articleToSave, userId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "article to save was not found",
+		})
+		return
+	}
+
+	if err := controller.service.Save(userId, articleToSave); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, article)
+}
+
+func (controller *ArticlesControllerProvider) Unsave(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run 'me' logic
+
+	userId := claims.Id
+
+	// check if the article to unsave exists
+	articleToUnsave := c.Param("id")
+	article, err := controller.service.GetById(articleToUnsave, userId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "article to unsave was not found",
+		})
+		return
+	}
+
+	if err := controller.service.Unsave(userId, articleToUnsave); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, article)
 }

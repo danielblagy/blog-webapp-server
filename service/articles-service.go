@@ -16,6 +16,8 @@ type ArticlesService interface {
 	Create(article entity.Article) (entity.Article, error)
 	Update(id string, updatedData entity.EditableArticleData) (entity.Article, error)
 	Delete(id string) (entity.Article, error)
+	Save(userId string, articleToSave string) error
+	Unsave(userId string, articleToUnsave string) error
 }
 
 type ArticlesServiceProvider struct {
@@ -136,4 +138,24 @@ func (service *ArticlesServiceProvider) Delete(id string) (entity.Article, error
 
 	result := service.database.Delete(&entity.Article{}, id)
 	return article, result.Error
+}
+
+func (service *ArticlesServiceProvider) Save(userId string, articleToSave string) error {
+	iUserId, err := strconv.Atoi(userId)
+	if err != nil {
+		return err
+	}
+
+	iArticleToSave, err := strconv.Atoi(articleToSave)
+	if err != nil {
+		return err
+	}
+
+	result := service.database.Create(&entity.Save{UserId: iUserId, ArticleId: iArticleToSave})
+	return result.Error
+}
+
+func (service *ArticlesServiceProvider) Unsave(userId string, articleToUnsave string) error {
+	result := service.database.Where("user_id = ? and article_id = ?", userId, articleToUnsave).Delete(&entity.Save{})
+	return result.Error
 }

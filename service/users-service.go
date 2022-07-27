@@ -141,7 +141,6 @@ func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
 	return user, result.Error
 }
 
-// TODO : check if already followed
 func (service *UsersServiceProvider) Follow(userId string, userToFollow string) error {
 	iUserId, err := strconv.Atoi(userId)
 	if err != nil {
