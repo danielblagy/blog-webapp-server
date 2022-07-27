@@ -34,4 +34,7 @@ func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controll
 
 	users.PUT("/:id", articlesController.Update)
 	users.DELETE("/:id", articlesController.Delete)
+
+	users.POST("/save/:id", articlesController.Save)
+	users.POST("/unsave/:id", articlesController.Unsave)
 }
