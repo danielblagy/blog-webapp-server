@@ -141,6 +141,7 @@ func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
 	return user, result.Error
 }
 
+// TODO : check if already followed
 func (service *UsersServiceProvider) Follow(userId string, userToFollow string) error {
 	iUserId, err := strconv.Atoi(userId)
 	if err != nil {
@@ -157,16 +158,6 @@ func (service *UsersServiceProvider) Follow(userId string, userToFollow string) 
 }
 
 func (service *UsersServiceProvider) Unfollow(userId string, userToUnfollow string) error {
-	iUserId, err := strconv.Atoi(userId)
-	if err != nil {
-		return err
-	}
-
-	iUserToUnfollow, err := strconv.Atoi(userToUnfollow)
-	if err != nil {
-		return err
-	}
-
-	result := service.database.Delete(&entity.Follower{FollowerId: iUserId, FollowsId: iUserToUnfollow})
+	result := service.database.Where("follower_id = ? and follows_id = ?", userId, userToUnfollow).Delete(&entity.Follower{})
 	return result.Error
 }
