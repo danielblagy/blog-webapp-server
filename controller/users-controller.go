@@ -20,6 +20,8 @@ type UsersController interface {
 	SignIn(c *gin.Context)
 	Refresh(c *gin.Context)
 	Me(c *gin.Context)
+	Follow(c *gin.Context)
+	Unfollow(c *gin.Context)
 }
 
 type UsersControllerProvider struct {
@@ -211,6 +213,84 @@ func (controller *UsersControllerProvider) Me(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (controller *UsersControllerProvider) Follow(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run 'me' logic
+
+	userId := claims.Id
+
+	user, err := controller.service.GetById(userId, true)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// check if the user to follow exists
+	userToFollow := c.Param("id")
+	_, err = controller.service.GetById(userToFollow, false)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "user to follow was not found",
+		})
+		return
+	}
+
+	if err := controller.service.Follow(userId, userToFollow); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func (controller *UsersControllerProvider) Unfollow(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run 'me' logic
+
+	userId := claims.Id
+
+	user, err := controller.service.GetById(userId, true)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// check if the user to unfollow exists
+	userToUnfollow := c.Param("id")
+	_, err = controller.service.GetById(userToUnfollow, false)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "user to unfollow was not found",
+		})
+		return
+	}
+
+	if err := controller.service.Unfollow(userId, userToUnfollow); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": err.Error(),
 		})
 		return

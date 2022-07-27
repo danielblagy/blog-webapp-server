@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/danielblagy/blog-webapp-server/entity"
 	"golang.org/x/crypto/bcrypt"
@@ -15,6 +16,8 @@ type UsersService interface {
 	Create(user entity.User) (entity.User, error)
 	Update(id string, updatedData entity.EditableUserData) (entity.User, error)
 	Delete(id string) (entity.User, error)
+	Follow(userId string, userToFollow string) error
+	Unfollow(userId string, userToUnfollow string) error
 }
 
 type UsersServiceProvider struct {
@@ -136,4 +139,34 @@ func (service *UsersServiceProvider) Delete(id string) (entity.User, error) {
 	user, _ := service.GetById(id, true) // getting the user before deleting to return
 	result := service.database.Delete(&entity.User{}, id)
 	return user, result.Error
+}
+
+func (service *UsersServiceProvider) Follow(userId string, userToFollow string) error {
+	iUserId, err := strconv.Atoi(userId)
+	if err != nil {
+		return err
+	}
+
+	iUserToFollow, err := strconv.Atoi(userToFollow)
+	if err != nil {
+		return err
+	}
+
+	result := service.database.Create(&entity.Follower{FollowerId: iUserId, FollowsId: iUserToFollow})
+	return result.Error
+}
+
+func (service *UsersServiceProvider) Unfollow(userId string, userToUnfollow string) error {
+	iUserId, err := strconv.Atoi(userId)
+	if err != nil {
+		return err
+	}
+
+	iUserToUnfollow, err := strconv.Atoi(userToUnfollow)
+	if err != nil {
+		return err
+	}
+
+	result := service.database.Delete(&entity.Follower{FollowerId: iUserId, FollowsId: iUserToUnfollow})
+	return result.Error
 }
