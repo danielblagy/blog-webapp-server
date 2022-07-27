@@ -19,6 +19,9 @@ func CreateUsersRoutes(apiGroup *gin.RouterGroup, usersController controller.Use
 	users.PUT("/", usersController.Update)
 	// TODO: create delete /:id endpoint for administrators
 	users.DELETE("/", usersController.Delete)
+
+	users.POST("/follow/:id", usersController.Follow)
+	users.POST("/unfollow/:id", usersController.Unfollow)
 }
 
 func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controller.ArticlesController) {
