@@ -18,6 +18,7 @@ type ArticlesController interface {
 	Delete(c *gin.Context)
 	Save(c *gin.Context)
 	Unsave(c *gin.Context)
+	GetSaves(c *gin.Context)
 }
 
 type ArticlesControllerProvider struct {
@@ -260,4 +261,26 @@ func (controller *ArticlesControllerProvider) Unsave(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, article)
+}
+
+func (controller *ArticlesControllerProvider) GetSaves(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run 'saves' logic
+
+	userId := claims.Id
+
+	articles, err := controller.service.GetSaves(userId)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, articles)
 }

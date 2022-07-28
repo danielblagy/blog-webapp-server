@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"log"
 	"strconv"
 
 	"github.com/danielblagy/blog-webapp-server/entity"
@@ -167,8 +166,6 @@ func (service *UsersServiceProvider) Unfollow(userId string, userToUnfollow stri
 func (service *UsersServiceProvider) GetFollowers(id string) ([]entity.User, error) {
 	var followersIds []int
 	result := service.database.Table("followers").Where("follows_id = ?", id).Select("follower_id").Find(&followersIds)
-
-	log.Println(followersIds)
 
 	var users []entity.User
 	result = service.database.Where("id in ?", followersIds).Find(&users)

@@ -18,6 +18,7 @@ type ArticlesService interface {
 	Delete(id string) (entity.Article, error)
 	Save(userId string, articleToSave string) error
 	Unsave(userId string, articleToUnsave string) error
+	GetSaves(userId string) ([]entity.Article, error)
 }
 
 type ArticlesServiceProvider struct {
@@ -158,4 +159,21 @@ func (service *ArticlesServiceProvider) Save(userId string, articleToSave string
 func (service *ArticlesServiceProvider) Unsave(userId string, articleToUnsave string) error {
 	result := service.database.Where("user_id = ? and article_id = ?", userId, articleToUnsave).Delete(&entity.Save{})
 	return result.Error
+}
+
+func (service *ArticlesServiceProvider) GetSaves(userId string) ([]entity.Article, error) {
+	var savedArticlesIds []int
+	result := service.database.Table("saves").Where("user_id = ?", userId).Select("article_id").Find(&savedArticlesIds)
+
+	var articles []entity.Article
+	result = service.database.Where("id in ? and published = true", savedArticlesIds).Find(&articles)
+
+	// associated data
+	for i := range articles {
+		if err := service.LoadAssociatedData(&articles[i]); err != nil {
+			return articles, err
+		}
+	}
+
+	return articles, result.Error
 }

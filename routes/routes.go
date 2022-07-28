@@ -40,4 +40,7 @@ func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controll
 
 	users.POST("/save/:id", articlesController.Save)
 	users.POST("/unsave/:id", articlesController.Unsave)
+
+	// returns saved articles for the authorized user
+	users.GET("/saves", articlesController.GetSaves)
 }
