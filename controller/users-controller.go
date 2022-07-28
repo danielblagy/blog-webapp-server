@@ -22,6 +22,8 @@ type UsersController interface {
 	Me(c *gin.Context)
 	Follow(c *gin.Context)
 	Unfollow(c *gin.Context)
+	GetFollowers(c *gin.Context)
+	GetFollowing(c *gin.Context)
 }
 
 type UsersControllerProvider struct {
@@ -297,4 +299,34 @@ func (controller *UsersControllerProvider) Unfollow(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, user)
+}
+
+func (controller *UsersControllerProvider) GetFollowers(c *gin.Context) {
+	user := c.Param("id")
+
+	followers, err := controller.service.GetFollowers(user)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, followers)
+}
+
+func (controller *UsersControllerProvider) GetFollowing(c *gin.Context) {
+	user := c.Param("id")
+
+	following, err := controller.service.GetFollowing(user)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, following)
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log"
 	"strconv"
 
 	"github.com/danielblagy/blog-webapp-server/entity"
@@ -18,6 +19,8 @@ type UsersService interface {
 	Delete(id string) (entity.User, error)
 	Follow(userId string, userToFollow string) error
 	Unfollow(userId string, userToUnfollow string) error
+	GetFollowers(id string) ([]entity.User, error)
+	GetFollowing(id string) ([]entity.User, error)
 }
 
 type UsersServiceProvider struct {
@@ -159,4 +162,42 @@ func (service *UsersServiceProvider) Follow(userId string, userToFollow string) 
 func (service *UsersServiceProvider) Unfollow(userId string, userToUnfollow string) error {
 	result := service.database.Where("follower_id = ? and follows_id = ?", userId, userToUnfollow).Delete(&entity.Follower{})
 	return result.Error
+}
+
+func (service *UsersServiceProvider) GetFollowers(id string) ([]entity.User, error) {
+	var followersIds []int
+	result := service.database.Table("followers").Where("follows_id = ?", id).Select("follower_id").Find(&followersIds)
+
+	log.Println(followersIds)
+
+	var users []entity.User
+	result = service.database.Where("id in ?", followersIds).Find(&users)
+
+	// load users associated data
+	for i := range users {
+		// TODO : handle "failed to load associated data" error in controller
+		if err := service.loadAssociatedFollowersData(&users[i]); err != nil {
+			return users, result.Error
+		}
+	}
+
+	return users, result.Error
+}
+
+func (service *UsersServiceProvider) GetFollowing(id string) ([]entity.User, error) {
+	var followingIds []int
+	result := service.database.Table("followers").Where("follower_id = ?", id).Select("follows_id").Find(&followingIds)
+
+	var users []entity.User
+	result = service.database.Where("id in ?", followingIds).Find(&users)
+
+	// load users associated data
+	for i := range users {
+		// TODO : handle "failed to load associated data" error in controller
+		if err := service.loadAssociatedFollowersData(&users[i]); err != nil {
+			return users, result.Error
+		}
+	}
+
+	return users, result.Error
 }

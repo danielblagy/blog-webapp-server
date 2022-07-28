@@ -22,6 +22,9 @@ func CreateUsersRoutes(apiGroup *gin.RouterGroup, usersController controller.Use
 
 	users.POST("/follow/:id", usersController.Follow)
 	users.POST("/unfollow/:id", usersController.Unfollow)
+
+	users.GET("/:id/followers", usersController.GetFollowers)
+	users.GET("/:id/following", usersController.GetFollowing)
 }
 
 func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controller.ArticlesController) {
