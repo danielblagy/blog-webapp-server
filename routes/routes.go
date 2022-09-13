@@ -43,4 +43,6 @@ func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controll
 
 	// returns saved articles for the authorized user
 	users.GET("/saves", articlesController.GetSaves)
+
+	users.GET("/issaved/:id", articlesController.IsSaved)
 }

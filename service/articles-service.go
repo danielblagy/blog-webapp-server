@@ -19,6 +19,7 @@ type ArticlesService interface {
 	Save(userId string, articleToSave string) error
 	Unsave(userId string, articleToUnsave string) error
 	GetSaves(userId string) ([]entity.Article, error)
+	IsSaved(userId string, articleId string) (bool, error)
 }
 
 type ArticlesServiceProvider struct {
@@ -176,4 +177,11 @@ func (service *ArticlesServiceProvider) GetSaves(userId string) ([]entity.Articl
 	}
 
 	return articles, result.Error
+}
+
+func (service *ArticlesServiceProvider) IsSaved(userId string, articleId string) (bool, error) {
+	var savedArticlesIds []int
+	result := service.database.Table("saves").Where("user_id = ? and article_id = ?", userId, articleId).Select("article_id").Find(&savedArticlesIds)
+
+	return result.RowsAffected > 0, result.Error
 }
