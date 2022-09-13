@@ -47,4 +47,6 @@ func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controll
 	users.GET("/saves", articlesController.GetSaves)
 
 	users.GET("/issaved/:id", articlesController.IsSaved)
+
+	users.GET("/for-you", articlesController.ForYou)
 }

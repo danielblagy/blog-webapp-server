@@ -20,6 +20,7 @@ type ArticlesService interface {
 	Unsave(userId string, articleToUnsave string) error
 	GetSaves(userId string) ([]entity.Article, error)
 	IsSaved(userId string, articleId string) (bool, error)
+	ForYou(userId string) ([]entity.Article, error)
 }
 
 type ArticlesServiceProvider struct {
@@ -184,4 +185,21 @@ func (service *ArticlesServiceProvider) IsSaved(userId string, articleId string)
 	result := service.database.Table("saves").Where("user_id = ? and article_id = ?", userId, articleId).Select("article_id").Find(&savedArticlesIds)
 
 	return result.RowsAffected > 0, result.Error
+}
+
+func (service *ArticlesServiceProvider) ForYou(userId string) ([]entity.Article, error) {
+	var following []int
+	result := service.database.Table("followers").Where("follower_id = ?", userId).Select("follows_id").Find(&following)
+
+	var articles []entity.Article
+	result = service.database.Where("author_id in ? and published = true", following).Find(&articles)
+
+	// associated data
+	for i := range articles {
+		if err := service.LoadAssociatedData(&articles[i]); err != nil {
+			return articles, err
+		}
+	}
+
+	return articles, result.Error
 }
