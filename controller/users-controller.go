@@ -24,6 +24,7 @@ type UsersController interface {
 	Unfollow(c *gin.Context)
 	GetFollowers(c *gin.Context)
 	GetFollowing(c *gin.Context)
+	IsFollowed(c *gin.Context)
 }
 
 type UsersControllerProvider struct {
@@ -329,4 +330,27 @@ func (controller *UsersControllerProvider) GetFollowing(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, following)
+}
+
+func (controller *UsersControllerProvider) IsFollowed(c *gin.Context) {
+	claims, ok := auth.CheckForAuthorization(c, "accessToken", "ACCESS_SECRET")
+	if !ok {
+		return
+	}
+
+	// if a token is provided and valid, run logic
+
+	userId := claims.Id
+
+	userToCheck := c.Param("id")
+	isFollowed, err := controller.service.IsFollowed(userId, userToCheck)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, isFollowed)
 }

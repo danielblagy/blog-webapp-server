@@ -25,6 +25,8 @@ func CreateUsersRoutes(apiGroup *gin.RouterGroup, usersController controller.Use
 
 	users.GET("/:id/followers", usersController.GetFollowers)
 	users.GET("/:id/following", usersController.GetFollowing)
+
+	users.GET("/:id/isfollowed", usersController.IsFollowed)
 }
 
 func CreateArticlesRoutes(apiGroup *gin.RouterGroup, articlesController controller.ArticlesController) {

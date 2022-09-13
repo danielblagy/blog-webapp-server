@@ -20,6 +20,7 @@ type UsersService interface {
 	Unfollow(userId string, userToUnfollow string) error
 	GetFollowers(id string) ([]entity.User, error)
 	GetFollowing(id string) ([]entity.User, error)
+	IsFollowed(userId string, userToCheckId string) (bool, error)
 }
 
 type UsersServiceProvider struct {
@@ -197,4 +198,11 @@ func (service *UsersServiceProvider) GetFollowing(id string) ([]entity.User, err
 	}
 
 	return users, result.Error
+}
+
+func (service *UsersServiceProvider) IsFollowed(userId string, userToCheckId string) (bool, error) {
+	var followingIds []int
+	result := service.database.Table("followers").Where("follower_id = ? and follows_id = ?", userId, userToCheckId).Select("follows_id").Find(&followingIds)
+
+	return result.RowsAffected > 0, result.Error
 }
