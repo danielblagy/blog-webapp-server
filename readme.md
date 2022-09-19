@@ -30,23 +30,38 @@
 | login | string | Each user has a unique login, max length is 100 characters. |
 | fullname | string | First and last name of the user, max length is 300 characters. |
 | articles | []Article | An array of articles written by the user. |
+| followers | int | Followers count. |
+| following | int | Following count. |
 
 JSON Example of User object
 
 ```json
 {
-    "id": 8,
-    "login": "jazz_oogie",
-    "fullname": "Jamie Dunkin",
+    "id": 10,
+    "login": "danielblagy",
+    "fullname": "Daniel Blagy",
     "articles": [
         {
-            "id": 5,
-            "author_id": 8,
-            "title": "my article",
-            "content": "hello :)",
-            "published": true
+            "id": 1,
+            "author_id": 10,
+            "title": "New Title",
+            "content": "Updated content.",
+            "published": true,
+            "created_at": "2022-05-25T16:45:55.881063+03:00",
+            "updated_at": "2022-05-25T16:45:55.881063+03:00",
+            "author": {
+                "id": 10,
+                "login": "danielblagy",
+                "fullname": "Daniel Blagy",
+                "articles": null,
+                "followers": 0,
+                "following": 0
+            },
+            "saves": 0
         }
-    ]
+    ],
+    "followers": 2,
+    "following": 0
 }
 ```
 
@@ -59,16 +74,31 @@ JSON Example of User object
 | title | string | Title must be unique relative to other articles of the user, max length is 300 characters. |
 | content | string | The content of the article. |
 | published | boolean | If true, it's public and can be read by other users, it's private otherwise. |
+| created_at | timestamp | When the article was created. |
+| updated_at | timestamp | When the article was last updated (edited). |
+| author | Author | The author of the article. |
+| saves | int | Saves count (how many people have favorited the article). |
 
 JSON Example of Article object
 
 ```json
 {
-    "id": 1,
-    "author_id": 10,
-    "title": "New Title",
-    "content": "Updated content.",
-    "published": true
+    "id": 10,
+    "author_id": 12,
+    "title": "Green Leopards",
+    "content": "Have u seen them?",
+    "published": true,
+    "created_at": "2022-05-25T16:57:06.772498+03:00",
+    "updated_at": "2022-05-25T16:58:14.365631+03:00",
+    "author": {
+        "id": 12,
+        "login": "sergey",
+        "fullname": "Sergey Urtugov",
+        "articles": null,
+        "followers": 0,
+        "following": 0
+    },
+    "saves": 0
 }
 ```
 
